@@ -20,11 +20,12 @@ contributions, KPI analytics, AI quality checks.
 ```
 git clone https://github.com/janottenbourg/genealogy-toolkit.git stamboom
 cd stamboom
-cp sample.ged yourtree.ged          # or drop in your real .ged
-python build.py yourtree.ged        # produces tree.json
+python3 build.py sample.ged        # produces tree.json from the bundled fixture
 php -r 'echo password_hash("changeme", PASSWORD_BCRYPT);' > .password
 php -S 127.0.0.1:8000               # open http://127.0.0.1:8000/
 ```
+
+Once it works with the sample data, replace `sample.ged` with your own `.ged` and re-run `build.py`.
 
 Default password is `changeme` — replace with your own before deploying.
 
@@ -34,7 +35,7 @@ Default password is `changeme` — replace with your own before deploying.
 stamboom/
 ├── build.py                 # GEDCOM → tree.json (Python 3.12)
 ├── sample.ged               # anonymized 15-person fixture
-├── jottenbourg.ged          # (gitignored) your real GEDCOM
+├── yourtree.ged             # (gitignored) your real GEDCOM
 ├── tree.json                # (gitignored) build artifact
 ├── .password                # (gitignored) bcrypt hash
 ├── index.php                # login form

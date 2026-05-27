@@ -33,7 +33,7 @@ GEDCOM. Public code repo: `janottenbourg/genealogy-toolkit`.
 
 ## Deploy (single file, `/jan/` style)
 
-```
+```bash
 scp <file> ubuntu@tienen.rip:/tmp/stamboom-<file>
 ssh ubuntu@tienen.rip "sudo install -o www-data -g www-data -m 644 \
     /tmp/stamboom-<file> /var/www/stamboom.ottenbourg.com/<file> \
