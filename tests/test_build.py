@@ -1,10 +1,18 @@
+import hashlib
 import json
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 SAMPLE = ROOT / "sample.ged"
+
+
+def hashlib_file(p: Path) -> str:
+    h = hashlib.sha256()
+    h.update(p.read_bytes())
+    return h.hexdigest()
 
 
 def run_build(tmp_path, ged=SAMPLE, extra_args=()):
@@ -124,3 +132,39 @@ def test_duplicate_ids_aborts_with_error(tmp_path):
     assert result.returncode != 0
     assert "duplicate" in result.stderr.lower() or "I1" in result.stderr
     assert not out.exists()
+
+
+def test_atomic_write_does_not_leave_partial_file(tmp_path):
+    """If build.py crashes mid-write, the .new file is left but tree.json is not corrupted."""
+    out = tmp_path / "tree.json"
+    out.write_text('{"sentinel": true}', encoding="utf-8")  # pre-existing
+    dup_ged = Path(__file__).parent / "fixtures" / "dup.ged"
+    subprocess.run(
+        [sys.executable, str(ROOT / "build.py"), str(dup_ged), "--out", str(out)],
+    )
+    # Existing tree.json must be untouched.
+    assert json.loads(out.read_text(encoding="utf-8")) == {"sentinel": True}
+
+
+def test_meta_root_id_defaults_to_first_individual(tmp_path):
+    tree = run_build(tmp_path)
+    assert tree["meta"]["root_id"] == "I1"
+
+
+def test_meta_root_id_cli_override(tmp_path):
+    tree = run_build(tmp_path, extra_args=("--root", "I3"))
+    assert tree["meta"]["root_id"] == "I3"
+
+
+def test_meta_source_filename_and_sha256(tmp_path):
+    tree = run_build(tmp_path)
+    assert tree["meta"]["source"] == "sample.ged"
+    # SHA-256 of sample.ged
+    expected = hashlib_file(SAMPLE)
+    assert tree["meta"]["source_sha256"] == expected
+
+
+def test_meta_built_at_is_iso8601(tmp_path):
+    tree = run_build(tmp_path)
+    # Parses without error
+    datetime.fromisoformat(tree["meta"]["built_at"].replace("Z", "+00:00"))

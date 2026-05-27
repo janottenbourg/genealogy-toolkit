@@ -207,14 +207,39 @@ def main() -> int:
     try:
         text = raw_bytes.decode("utf-8")
     except UnicodeDecodeError as e:
-        print(f"warning: {args.ged} not valid UTF-8 ({e}); falling back to CP1252", file=sys.stderr)
+        print(f"warning: {args.ged} not valid UTF-8 ({e}); falling back to CP1252",
+              file=sys.stderr)
         text = raw_bytes.decode("cp1252")
+
     try:
         tree = parse_gedcom(text)
     except ValueError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
+
     detect_cycles(tree)
+
+    # Resolve root_id
+    if args.root:
+        if args.root not in tree["individuals"]:
+            print(f"error: --root {args.root} not found in GEDCOM", file=sys.stderr)
+            return 2
+        root_id = args.root
+    else:
+        # First INDI in iteration order. Python 3.7+ dicts are insertion-ordered.
+        root_id = next(iter(tree["individuals"]), None)
+
+    sha = hashlib.sha256(raw_bytes).hexdigest()
+    mtime = datetime.fromtimestamp(args.ged.stat().st_mtime, tz=timezone.utc)
+    built_at = datetime.now(tz=timezone.utc)
+
+    tree["meta"].update({
+        "source": args.ged.name,
+        "source_sha256": sha,
+        "source_mtime": mtime.isoformat().replace("+00:00", "Z"),
+        "built_at": built_at.isoformat().replace("+00:00", "Z"),
+        "root_id": root_id,
+    })
 
     tmp = args.out.with_suffix(args.out.suffix + ".new")
     tmp.write_text(json.dumps(tree, ensure_ascii=False, indent=2), encoding="utf-8")
