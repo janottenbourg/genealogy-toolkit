@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -10,7 +11,7 @@ def run_build(tmp_path, ged=SAMPLE, extra_args=()):
     """Run build.py against `ged`, writing to tmp_path/tree.json. Returns parsed JSON."""
     out = tmp_path / "tree.json"
     subprocess.run(
-        ["python", str(ROOT / "build.py"), str(ged), "--out", str(out), *extra_args],
+        [sys.executable, str(ROOT / "build.py"), str(ged), "--out", str(out), *extra_args],
         check=True,
         cwd=tmp_path,
     )

@@ -22,6 +22,18 @@ def parse_gedcom(text: str) -> dict:
     current: dict | None = None
     current_kind: str | None = None  # 'INDI' or 'FAM'
 
+    def commit() -> None:
+        """Persist `current` into the right bucket if any. Resets state."""
+        nonlocal current, current_kind
+        if current is None:
+            return
+        if current_kind == "INDI":
+            individuals[current["id"]] = current
+        elif current_kind == "FAM":
+            families[current["id"]] = current
+        current = None
+        current_kind = None
+
     for raw_line in text.splitlines():
         line = raw_line.rstrip("\r\n")
         if not line.strip():
@@ -29,23 +41,16 @@ def parse_gedcom(text: str) -> dict:
         parts = line.split(" ", 2)
         level = int(parts[0])
         if level == 0:
-            # New top-level record. Commit previous.
-            if current is not None and current_kind == "INDI":
-                individuals[current["id"]] = current
-            elif current is not None and current_kind == "FAM":
-                families[current["id"]] = current
-            current, current_kind = None, None
+            commit()
             if len(parts) >= 3 and parts[2] == "INDI":
                 current = {"id": parts[1].strip("@"), "name": {}, "spouse_families": []}
                 current_kind = "INDI"
             elif len(parts) >= 3 and parts[2] == "FAM":
                 current = {"id": parts[1].strip("@"), "children": []}
                 current_kind = "FAM"
-    # Final commit
-    if current is not None and current_kind == "INDI":
-        individuals[current["id"]] = current
-    elif current is not None and current_kind == "FAM":
-        families[current["id"]] = current
+        # level >= 1 lines: ignored in this slice; Task 4 will extend here.
+
+    commit()  # final record
 
     return {
         "meta": {
