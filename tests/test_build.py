@@ -22,3 +22,32 @@ def test_individual_count(tmp_path):
     tree = run_build(tmp_path)
     assert tree["meta"]["individuals"] == 15
     assert len(tree["individuals"]) == 15
+
+
+def test_family_count(tmp_path):
+    tree = run_build(tmp_path)
+    assert tree["meta"]["families"] == 7
+    assert len(tree["families"]) == 7
+
+
+def test_husband_wife_children_linked(tmp_path):
+    tree = run_build(tmp_path)
+    f1 = tree["families"]["F1"]
+    assert f1["husband"] == "I1"
+    assert f1["wife"] == "I2"
+    assert f1["children"] == ["I3", "I4"]
+
+
+def test_individual_famc_fams(tmp_path):
+    tree = run_build(tmp_path)
+    i3 = tree["individuals"]["I3"]
+    assert i3["parents_family"] == "F1"
+    assert set(i3["spouse_families"]) == {"F2", "F3"}
+
+
+def test_names_split_into_given_surname(tmp_path):
+    tree = run_build(tmp_path)
+    i1 = tree["individuals"]["I1"]
+    assert i1["name"]["given"] == "Désiré"
+    assert i1["name"]["surname"] == "Janssens"
+    assert i1["name"]["display"] == "Désiré Janssens"
