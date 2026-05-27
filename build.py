@@ -56,8 +56,12 @@ def parse_gedcom(text: str) -> dict:
         if current is None:
             return
         if current_kind == "INDI":
+            if current["id"] in individuals:
+                raise ValueError(f"duplicate INDI id: @{current['id']}@")
             individuals[current["id"]] = current
         elif current_kind == "FAM":
+            if current["id"] in families:
+                raise ValueError(f"duplicate FAM id: @{current['id']}@")
             families[current["id"]] = current
         current = None
         current_kind = None
@@ -205,7 +209,11 @@ def main() -> int:
     except UnicodeDecodeError as e:
         print(f"warning: {args.ged} not valid UTF-8 ({e}); falling back to CP1252", file=sys.stderr)
         text = raw_bytes.decode("cp1252")
-    tree = parse_gedcom(text)
+    try:
+        tree = parse_gedcom(text)
+    except ValueError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
     detect_cycles(tree)
 
     tmp = args.out.with_suffix(args.out.suffix + ".new")

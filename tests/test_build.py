@@ -111,3 +111,16 @@ def test_no_cycle_in_sample(tmp_path):
     tree = run_build(tmp_path)
     for ind in tree["individuals"].values():
         assert ind.get("cycle") is not True
+
+
+def test_duplicate_ids_aborts_with_error(tmp_path):
+    dup_ged = Path(__file__).parent / "fixtures" / "dup.ged"
+    out = tmp_path / "tree.json"
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "build.py"), str(dup_ged), "--out", str(out)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "duplicate" in result.stderr.lower() or "I1" in result.stderr
+    assert not out.exists()
