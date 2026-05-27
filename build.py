@@ -14,6 +14,35 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
+_MONTH = {
+    "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
+    "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
+    "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12",
+}
+
+
+def gedcom_date_to_iso(raw: str) -> str | None:
+    """Return YYYY-MM-DD only if the date is unambiguous and complete.
+    Fuzzy modifiers (ABT/BEF/AFT/EST/BET) and year-only dates return None."""
+    if not raw:
+        return None
+    parts = raw.strip().split()
+    if not parts:
+        return None
+    # Any fuzzy modifier disqualifies precise ISO.
+    if parts[0].upper() in ("ABT", "BEF", "AFT", "EST", "CAL", "BET"):
+        return None
+    # Exact: "DD MON YYYY"
+    if len(parts) == 3 and parts[1].upper() in _MONTH:
+        day = parts[0].zfill(2)
+        mon = _MONTH[parts[1].upper()]
+        year = parts[2]
+        if len(year) == 4 and year.isdigit() and day.isdigit() and 1 <= int(day) <= 31:
+            return f"{year}-{mon}-{day}"
+    # Month + year only, or year only → leave unresolved (don't fake precision).
+    return None
+
+
 def parse_gedcom(text: str) -> dict:
     individuals: dict[str, dict] = {}
     families: dict[str, dict] = {}
@@ -95,7 +124,9 @@ def parse_gedcom(text: str) -> dict:
             elif level == 2 and tag == "DATE" and len(sub_path) >= 2:
                 ev = sub_path[0].lower().replace("birt", "birth").replace("deat", "death")
                 if ev in ("birth", "death"):
-                    current.setdefault(ev, {})["raw"] = value
+                    current.setdefault(ev, {})
+                    current[ev]["raw"] = value
+                    current[ev]["iso"] = gedcom_date_to_iso(value)
             elif level == 2 and tag == "PLAC" and len(sub_path) >= 2:
                 ev = sub_path[0].lower().replace("birt", "birth").replace("deat", "death")
                 if ev in ("birth", "death"):
@@ -111,7 +142,9 @@ def parse_gedcom(text: str) -> dict:
             elif level == 1 and tag == "MARR":
                 current["marriage"] = {}
             elif level == 2 and tag == "DATE" and sub_path[:1] == ["MARR"]:
-                current.setdefault("marriage", {})["raw"] = value
+                current.setdefault("marriage", {})
+                current["marriage"]["raw"] = value
+                current["marriage"]["iso"] = gedcom_date_to_iso(value)
             elif level == 2 and tag == "PLAC" and sub_path[:1] == ["MARR"]:
                 current.setdefault("marriage", {})["place"] = value if value else None
 

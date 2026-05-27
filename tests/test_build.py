@@ -51,3 +51,29 @@ def test_names_split_into_given_surname(tmp_path):
     assert i1["name"]["given"] == "Désiré"
     assert i1["name"]["surname"] == "Janssens"
     assert i1["name"]["display"] == "Désiré Janssens"
+
+
+def test_fuzzy_date_preserved_in_raw(tmp_path):
+    tree = run_build(tmp_path)
+    assert tree["individuals"]["I2"]["birth"]["raw"] == "ABT 1912"
+    assert tree["individuals"]["I5"]["birth"]["raw"] == "BEF 1900"
+    assert tree["individuals"]["I5"]["death"]["raw"] == "BET 1960 AND 1965"
+    assert tree["individuals"]["I11"]["birth"]["raw"] == "EST 1700"
+
+
+def test_iso_dates_when_parseable(tmp_path):
+    tree = run_build(tmp_path)
+    assert tree["individuals"]["I1"]["birth"]["iso"] == "1910-11-04"
+    assert tree["individuals"]["I1"]["death"]["iso"] == "1992-01-23"
+    # Year-only resolves to YYYY-01-01? No — leave year-only unresolved (iso=None)
+    # because we don't want to fake precision. Test that year-only dates are NOT
+    # resolved to fake months/days.
+    assert tree["individuals"]["I4"]["birth"]["iso"] is None
+    assert tree["individuals"]["I4"]["birth"]["raw"] == "1942"
+
+
+def test_iso_null_when_unparseable(tmp_path):
+    tree = run_build(tmp_path)
+    assert tree["individuals"]["I2"]["birth"]["iso"] is None
+    assert tree["individuals"]["I5"]["birth"]["iso"] is None
+    assert tree["individuals"]["I5"]["death"]["iso"] is None
