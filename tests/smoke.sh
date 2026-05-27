@@ -15,13 +15,24 @@ else
     exit 1
 fi
 
-# Resolve Python similarly
-if command -v python3 > /dev/null 2>&1; then
+# Resolve Python — must respond to --version on stdout (catches Windows MS Store stub).
+pick_python() {
+    local candidate="$1"
+    command -v "$candidate" > /dev/null 2>&1 || return 1
+    local ver
+    ver=$("$candidate" --version 2>&1 || true)
+    case "$ver" in
+        Python\ 3.*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+if pick_python python3; then
     PY=python3
-elif command -v python > /dev/null 2>&1; then
+elif pick_python python; then
     PY=python
 else
-    echo "ERROR: no Python found (tried 'python3' and 'python')"
+    echo "ERROR: no working Python 3 found (tried 'python3' and 'python')"
     exit 1
 fi
 
