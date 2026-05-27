@@ -160,6 +160,38 @@ def parse_gedcom(text: str) -> dict:
     }
 
 
+def detect_cycles(tree: dict) -> None:
+    """DFS through parent links. Any individual reachable from itself is in a cycle.
+    Mutates `tree` in place: sets individuals[ID]['cycle'] = True for offenders."""
+    inds = tree["individuals"]
+    fams = tree["families"]
+
+    def parents_of(ind_id: str) -> list[str]:
+        ind = inds.get(ind_id)
+        if not ind or "parents_family" not in ind:
+            return []
+        fam = fams.get(ind["parents_family"])
+        if not fam:
+            return []
+        return [p for p in (fam.get("husband"), fam.get("wife")) if p]
+
+    for start in inds:
+        seen = set()
+        stack = [start]
+        while stack:
+            cur = stack.pop()
+            for p in parents_of(cur):
+                if p == start:
+                    inds[start]["cycle"] = True
+                    print(f"warning: cycle detected involving {start}", file=sys.stderr)
+                    stack.clear()
+                    break
+                if p in seen:
+                    continue
+                seen.add(p)
+                stack.append(p)
+
+
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("ged", type=Path)
@@ -174,6 +206,7 @@ def main() -> int:
         print(f"warning: {args.ged} not valid UTF-8 ({e}); falling back to CP1252", file=sys.stderr)
         text = raw_bytes.decode("cp1252")
     tree = parse_gedcom(text)
+    detect_cycles(tree)
 
     tmp = args.out.with_suffix(args.out.suffix + ".new")
     tmp.write_text(json.dumps(tree, ensure_ascii=False, indent=2), encoding="utf-8")

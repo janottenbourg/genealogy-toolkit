@@ -98,3 +98,16 @@ def test_cp1252_fallback(tmp_path):
     cp1252_ged.write_bytes(src.encode("cp1252"))
     tree = run_build(tmp_path, ged=cp1252_ged)
     assert tree["individuals"]["I1"]["name"]["display"] == "Désiré Janssens"
+
+
+def test_cycle_detection_marks_involved_individuals(tmp_path):
+    cycle_ged = Path(__file__).parent / "fixtures" / "cycle.ged"
+    tree = run_build(tmp_path, ged=cycle_ged)
+    assert tree["individuals"]["I1"].get("cycle") is True
+    assert tree["individuals"]["I2"].get("cycle") is True
+
+
+def test_no_cycle_in_sample(tmp_path):
+    tree = run_build(tmp_path)
+    for ind in tree["individuals"].values():
+        assert ind.get("cycle") is not True
