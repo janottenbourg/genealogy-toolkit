@@ -1,0 +1,20 @@
+# Private family data — NEVER commit
+jottenbourg.ged
+*.ged.bak
+
+# Build artifacts
+tree.json
+tree.json.new
+
+# Auth
+.password
+
+# Brainstorming companion artifacts
+.superpowers/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+__pycache__/
+.pytest_cache/
