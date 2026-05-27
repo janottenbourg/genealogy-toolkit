@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import sys
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -196,6 +197,31 @@ def detect_cycles(tree: dict) -> None:
                 stack.append(p)
 
 
+def strip_diacritics(s: str) -> str:
+    """'Désiré' → 'desire'. NFKD-decompose, drop combining marks, lowercase."""
+    nfkd = unicodedata.normalize("NFKD", s)
+    return "".join(c for c in nfkd if not unicodedata.combining(c)).lower()
+
+
+def build_indexes(tree: dict) -> None:
+    """Populate tree['indexes']. Mutates in place."""
+    by_surname: dict[str, list[str]] = {}
+    name_search: list[dict] = []
+
+    for ind_id, ind in tree["individuals"].items():
+        surname = ind["name"].get("surname", "").upper()
+        if surname:
+            by_surname.setdefault(surname, []).append(ind_id)
+
+        display = ind["name"].get("display", "")
+        name_search.append({"id": ind_id, "k": strip_diacritics(display)})
+
+    tree["indexes"] = {
+        "by_surname": by_surname,
+        "name_search": name_search,
+    }
+
+
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("ged", type=Path)
@@ -218,6 +244,7 @@ def main() -> int:
         return 2
 
     detect_cycles(tree)
+    build_indexes(tree)
 
     # Resolve root_id
     if args.root:

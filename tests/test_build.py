@@ -168,3 +168,23 @@ def test_meta_built_at_is_iso8601(tmp_path):
     tree = run_build(tmp_path)
     # Parses without error
     datetime.fromisoformat(tree["meta"]["built_at"].replace("Z", "+00:00"))
+
+
+def test_index_by_surname(tmp_path):
+    tree = run_build(tmp_path)
+    by_surname = tree["indexes"]["by_surname"]
+    assert "JANSSENS" in by_surname
+    assert set(by_surname["JANSSENS"]) == {"I1", "I3", "I4", "I7", "I9", "I10"}
+    assert "VANDENBERG" in by_surname
+    assert "PEETERS" in by_surname
+
+
+def test_name_search_index_lowercase_no_diacritics(tmp_path):
+    tree = run_build(tmp_path)
+    ns = tree["indexes"]["name_search"]
+    # I1 = Désiré Janssens → stripped to "desire janssens"
+    i1_entry = next(e for e in ns if e["id"] == "I1")
+    assert i1_entry["k"] == "desire janssens"
+    # I5 = François Peeters → "francois peeters"
+    i5_entry = next(e for e in ns if e["id"] == "I5")
+    assert i5_entry["k"] == "francois peeters"
