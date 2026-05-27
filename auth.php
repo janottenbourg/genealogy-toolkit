@@ -11,9 +11,15 @@
 
 function __stam_session_start(): void {
     if (session_status() === PHP_SESSION_NONE) {
+        // cookie_secure: only require HTTPS-only cookie when actually on HTTPS,
+        // so local `php -S` HTTP dev still works.
+        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+               || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+               || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
         session_start([
             'cookie_httponly' => true,
             'cookie_samesite' => 'Lax',
+            'cookie_secure'   => $secure,
         ]);
     }
 }
