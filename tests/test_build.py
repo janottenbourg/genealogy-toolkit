@@ -77,3 +77,24 @@ def test_iso_null_when_unparseable(tmp_path):
     assert tree["individuals"]["I2"]["birth"]["iso"] is None
     assert tree["individuals"]["I5"]["birth"]["iso"] is None
     assert tree["individuals"]["I5"]["death"]["iso"] is None
+
+
+def test_diacritics_roundtrip_utf8(tmp_path):
+    tree = run_build(tmp_path)
+    assert tree["individuals"]["I1"]["name"]["display"] == "Désiré Janssens"
+    assert tree["individuals"]["I2"]["name"]["display"] == "Hélène De Smet"
+    assert tree["individuals"]["I5"]["name"]["display"] == "François Peeters"
+    # Round-trip: re-read tree.json as raw bytes, must be UTF-8.
+    out = tmp_path / "tree.json"
+    raw = out.read_bytes()
+    raw.decode("utf-8")  # must not raise
+
+
+def test_cp1252_fallback(tmp_path):
+    """If the .ged is mis-encoded as CP1252 (Geneanet sometimes does this),
+    build.py falls back and produces correct UTF-8 output."""
+    src = SAMPLE.read_text(encoding="utf-8")
+    cp1252_ged = tmp_path / "cp1252.ged"
+    cp1252_ged.write_bytes(src.encode("cp1252"))
+    tree = run_build(tmp_path, ged=cp1252_ged)
+    assert tree["individuals"]["I1"]["name"]["display"] == "Désiré Janssens"

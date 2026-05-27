@@ -130,7 +130,7 @@
 0 @F5@ FAM
 1 HUSB @I11@
 1 WIFE @I12@
-1 NOTE Fixture quirk: childless couple AND I11/I12 have no FAMS @F5@ back-pointers — tests asymmetric FAM→INDI references.
+1 NOTE Fixture quirk: childless couple AND I11/I12 have no FAMS @F5@ back-pointers -- tests asymmetric FAM->INDI references.
 0 @F6@ FAM
 1 HUSB @I5@
 1 NOTE Fixture quirk: HUSB-only single-parent FAM, and I5 has no FAMS @F6@ back-pointer — tests dangling family record.

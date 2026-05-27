@@ -167,7 +167,12 @@ def main() -> int:
     p.add_argument("--root", type=str, default=None)
     args = p.parse_args()
 
-    text = args.ged.read_text(encoding="utf-8")
+    raw_bytes = args.ged.read_bytes()
+    try:
+        text = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError as e:
+        print(f"warning: {args.ged} not valid UTF-8 ({e}); falling back to CP1252", file=sys.stderr)
+        text = raw_bytes.decode("cp1252")
     tree = parse_gedcom(text)
 
     tmp = args.out.with_suffix(args.out.suffix + ".new")
