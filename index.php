@@ -1,8 +1,9 @@
 <?php
 require_once __DIR__ . '/auth.php';
 if (isAuthed()) { header('Location: home.php'); exit; }
-$err  = isset($_GET['err']) ? 'Ongeldig wachtwoord.' : null;
+$err  = isset($_GET['err']) ? 'Ongeldige e-mail of wachtwoord.' : null;
 $next = $_GET['next'] ?? 'home.php';
+$csrf = csrfToken();
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -19,11 +20,17 @@ $next = $_GET['next'] ?? 'home.php';
     <p class="subtitle">Meld je aan om de familiestamboom te bekijken</p>
     <?php if ($err): ?><div class="err"><?= htmlspecialchars($err) ?></div><?php endif; ?>
     <form method="post" action="login.php" autocomplete="on">
-      <input type="hidden" name="next" value="<?= htmlspecialchars($next) ?>">
+      <input type="hidden" name="next"  value="<?= htmlspecialchars($next) ?>">
+      <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" autocomplete="email" autofocus required>
       <label for="pw">Wachtwoord</label>
-      <input id="pw" name="password" type="password" autofocus required>
+      <input id="pw" name="password" type="password" autocomplete="current-password" required>
       <button type="submit">Inloggen</button>
     </form>
+    <p class="subtitle" style="margin-top:14px">
+      Geen account? Vraag de beheerder om een uitnodigingslink.
+    </p>
   </main>
 </body>
 </html>
