@@ -25,10 +25,13 @@ ssh -i "$PEM" "$HOST" "sudo rsync -av --delete \
     $STAGE/ $WEBROOT/"
 
 echo "==> Pull JSON state to local"
+# Files are mode 640 owned by www-data — stage to /tmp via sudo before scp
+ssh -i "$PEM" "$HOST" "sudo cp -p $WEBROOT/users.json $WEBROOT/augment.json $WEBROOT/invites.json /tmp/ 2>/dev/null && sudo chown ubuntu:ubuntu /tmp/users.json /tmp/augment.json /tmp/invites.json 2>/dev/null"
 scp -i "$PEM" \
-    "$HOST:$WEBROOT/users.json" \
-    "$HOST:$WEBROOT/augment.json" \
-    "$HOST:$WEBROOT/invites.json" \
+    "$HOST:/tmp/users.json" \
+    "$HOST:/tmp/augment.json" \
+    "$HOST:/tmp/invites.json" \
     "$LOCAL/" 2>/dev/null || echo "  (one or more JSON files not yet on the box — fine on first deploy)"
+ssh -i "$PEM" "$HOST" "rm -f /tmp/users.json /tmp/augment.json /tmp/invites.json"
 
 echo "==> Done"
