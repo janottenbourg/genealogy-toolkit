@@ -6,8 +6,11 @@ jottenbourg.ged
 tree.json
 tree.json.new
 
-# Auth
+# Auth + v2 state (PII — never commit)
 .password
+users.json
+augment.json
+invites.json
 
 # Brainstorming companion artifacts
 .superpowers/
