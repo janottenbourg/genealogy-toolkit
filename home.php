@@ -12,13 +12,12 @@ function strftime_compat(string $iso): string {
 }
 
 $meta   = stam_meta();
+$focal  = stam_individual(currentFocalId() ?? '');
 $root   = stam_individual($meta['root_id'] ?? '');
 $active_nav = 'home';
 
 $built_at_nl = $meta['built_at'] ?? '?';
-if ($built_at_nl !== '?') {
-    $built_at_nl = strftime_compat($built_at_nl);
-}
+if ($built_at_nl !== '?') $built_at_nl = strftime_compat($built_at_nl);
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -33,17 +32,24 @@ if ($built_at_nl !== '?') {
 <?php include __DIR__ . '/menu.php'; ?>
 
 <main class="page">
-  <h1>Stamboom Ottenbourg</h1>
-  <p>Welkom. Deze familiestamboom telt <strong><?= (int)($meta['individuals'] ?? 0) ?></strong>
+  <?php if ($focal): ?>
+    <h1>Welkom, <?= htmlspecialchars($focal['name']['display'] ?? 'familielid') ?></h1>
+    <p>
+      <a class="person-card focal" href="boom.php?id=<?= htmlspecialchars($focal['id']) ?>">
+        <span class="name"><?= htmlspecialchars($focal['name']['display'] ?? 'Onbekend') ?></span>
+        <span class="dates"><?= htmlspecialchars(stam_lifespan($focal)) ?></span>
+      </a>
+    </p>
+    <p><a href="boom.php?id=<?= htmlspecialchars($focal['id']) ?>">→ Open jouw stamboom-weergave</a></p>
+  <?php else: ?>
+    <h1>Stamboom Ottenbourg</h1>
+  <?php endif; ?>
+
+  <p>Deze familiestamboom telt <strong><?= (int)($meta['individuals'] ?? 0) ?></strong>
      personen verspreid over <strong><?= (int)($meta['families'] ?? 0) ?></strong> gezinnen.</p>
 
-  <?php if ($root): ?>
-  <h2>Start bij de hoofdpersoon</h2>
-  <a class="person-card focal" href="boom.php?id=<?= htmlspecialchars($root['id']) ?>">
-    <span class="name"><?= htmlspecialchars($root['name']['display'] ?? 'Onbekend') ?></span>
-    <span class="dates"><?= htmlspecialchars(stam_lifespan($root)) ?></span>
-  </a>
-  <p style="margin-top:16px"><a href="boom.php?id=<?= htmlspecialchars($root['id']) ?>">Open de stamboom-weergave →</a></p>
+  <?php if ($root && (!$focal || $focal['id'] !== $root['id'])): ?>
+    <p><a href="boom.php?id=<?= htmlspecialchars($root['id']) ?>">→ Stamboom vanaf hoofdpersoon (<?= htmlspecialchars($root['name']['display'] ?? '') ?>)</a></p>
   <?php endif; ?>
 </main>
 
