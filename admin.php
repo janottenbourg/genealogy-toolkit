@@ -186,5 +186,7 @@ function tab_link(string $slug, string $label, string $current): string {
     </section>
   <?php endif; ?>
 </main>
+
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>

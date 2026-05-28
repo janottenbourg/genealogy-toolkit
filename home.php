@@ -3,21 +3,9 @@ require_once __DIR__ . '/auth.php';
 requireAuth();
 require_once __DIR__ . '/lib/tree.php';
 
-function strftime_compat(string $iso): string {
-    $t = strtotime($iso);
-    if ($t === false) return $iso;
-    $months = ['', 'januari','februari','maart','april','mei','juni',
-                   'juli','augustus','september','oktober','november','december'];
-    return date('j', $t) . ' ' . $months[(int)date('n', $t)] . ' ' . date('Y', $t);
-}
-
 $meta   = stam_meta();
 $focal  = stam_individual(currentFocalId() ?? '');
-$root   = stam_individual($meta['root_id'] ?? '');
 $active_nav = 'home';
-
-$built_at_nl = $meta['built_at'] ?? '?';
-if ($built_at_nl !== '?') $built_at_nl = strftime_compat($built_at_nl);
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -49,9 +37,6 @@ if ($built_at_nl !== '?') $built_at_nl = strftime_compat($built_at_nl);
      personen verspreid over <strong><?= (int)($meta['families'] ?? 0) ?></strong> gezinnen.</p>
 </main>
 
-<footer class="build-info">
-  Stamboom-data: <?= htmlspecialchars($meta['source'] ?? '?') ?>
-  · gegenereerd op <?= htmlspecialchars($built_at_nl) ?>
-</footer>
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>

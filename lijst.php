@@ -35,5 +35,7 @@ $active_nav = 'lijst';
     <?= stam_render_alpha_index($letter) ?>
   <?php endif; ?>
 </main>
+
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>

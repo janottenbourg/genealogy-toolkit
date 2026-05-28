@@ -21,5 +21,7 @@ $active_nav = '';
      en zijn de ID's veranderd.</p>
   <p>Probeer te zoeken op naam: <a href="zoek.php">→ Zoeken</a>.</p>
 </main>
+
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>

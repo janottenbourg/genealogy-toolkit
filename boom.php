@@ -42,5 +42,7 @@ $active_nav = 'boom';
 
   <?= stam_render_hourglass($id, $gen_up, $gen_down) ?>
 </main>
+
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>

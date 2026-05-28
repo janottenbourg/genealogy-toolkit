@@ -212,5 +212,7 @@ function person_card_link(array $p): string {
     <p><a href="boom.php?id=<?= htmlspecialchars($id) ?>">→ Toon in stamboom-weergave</a></p>
   <?php endif; ?>
 </main>
+
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>
