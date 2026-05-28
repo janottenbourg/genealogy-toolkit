@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uitnodiging | Stamboom Ottenbourg</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <main class="login-card">
+    <h1>Uitnodiging</h1>
+    <div class="err"><?= htmlspecialchars($msg ?? 'Er ging iets mis.') ?></div>
+    <p class="subtitle"><a href="index.php">Terug naar inloggen</a></p>
+  </main>
+</body>
+</html>
