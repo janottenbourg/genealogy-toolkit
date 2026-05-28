@@ -41,6 +41,9 @@ function stam_json_mutate(string $path, callable $mutate): array {
         fclose($fp);
         throw new RuntimeException("stam_json_mutate: cannot lock $path");
     }
+
+    $new = null;
+    $encoded = null;
     try {
         rewind($fp);
         $raw = stream_get_contents($fp);
@@ -53,18 +56,21 @@ function stam_json_mutate(string $path, callable $mutate): array {
         if ($encoded === false) {
             throw new RuntimeException("stam_json_mutate: json_encode failed");
         }
-        $tmp = $path . '.new';
-        if (file_put_contents($tmp, $encoded . "\n") === false) {
-            throw new RuntimeException("stam_json_mutate: write tmp failed");
-        }
-        if (!rename($tmp, $path)) {
-            @unlink($tmp);
-            throw new RuntimeException("stam_json_mutate: rename failed");
-        }
-        @chmod($path, 0640);
-        return $new;
     } finally {
         flock($fp, LOCK_UN);
         fclose($fp);
     }
+
+    // Lock released. Now write the tmp file and atomically rename.
+    // (Windows requires the target handle to be closed before rename.)
+    $tmp = $path . '.new';
+    if (file_put_contents($tmp, $encoded . "\n") === false) {
+        throw new RuntimeException("stam_json_mutate: write tmp failed");
+    }
+    if (!rename($tmp, $path)) {
+        @unlink($tmp);
+        throw new RuntimeException("stam_json_mutate: rename failed");
+    }
+    @chmod($path, 0640);
+    return $new;
 }
