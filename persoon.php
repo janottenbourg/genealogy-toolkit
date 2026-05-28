@@ -21,6 +21,7 @@ $csrf       = csrfToken();
 $augment = stam_augment_for($id);
 $field   = [
     'email'     => $augment['email'],
+    'mobile'    => $augment['mobile'],
     'facebook'  => $augment['facebook'],
     'linkedin'  => $augment['linkedin'],
     'instagram' => $augment['instagram'],
@@ -40,6 +41,8 @@ if ($edit_mode && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $next = $field;
     [$ok, $v] = stam_v_email_optional($_POST['email'] ?? '');
     $ok ? $next['email'] = $v : $errors[] = $v;
+    [$ok, $v] = stam_v_mobile_optional($_POST['mobile'] ?? '');
+    $ok ? $next['mobile'] = $v : $errors[] = $v;
     [$ok, $v] = stam_v_facebook($_POST['facebook'] ?? '');
     $ok ? $next['facebook'] = $v : $errors[] = $v;
     [$ok, $v] = stam_v_linkedin($_POST['linkedin'] ?? '');
@@ -142,6 +145,8 @@ function person_card_link(array $p): string {
       <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
       <label for="email">E-mail</label>
       <input id="email" name="email" type="email" value="<?= htmlspecialchars($field['email']) ?>">
+      <label for="mobile">Mobiel</label>
+      <input id="mobile" name="mobile" type="tel" value="<?= htmlspecialchars($field['mobile']) ?>">
       <label for="facebook">Facebook</label>
       <input id="facebook" name="facebook" type="url" value="<?= htmlspecialchars($field['facebook']) ?>">
       <label for="linkedin">LinkedIn</label>
@@ -161,6 +166,7 @@ function person_card_link(array $p): string {
         <h3>Persoonlijke gegevens</h3>
         <dl>
           <?php if ($field['email']):     ?><dt>E-mail</dt><dd><a href="mailto:<?= htmlspecialchars($field['email']) ?>"><?= htmlspecialchars($field['email']) ?></a></dd><?php endif; ?>
+          <?php if ($field['mobile']):    ?><dt>Mobiel</dt><dd><a href="tel:<?= htmlspecialchars(preg_replace('/\s+/', '', $field['mobile'])) ?>"><?= htmlspecialchars($field['mobile']) ?></a></dd><?php endif; ?>
           <?php if ($field['facebook']):  ?><dt>Facebook</dt><dd><a target="_blank" rel="noopener noreferrer" href="<?= htmlspecialchars($field['facebook']) ?>"><?= htmlspecialchars($field['facebook']) ?></a></dd><?php endif; ?>
           <?php if ($field['linkedin']):  ?><dt>LinkedIn</dt><dd><a target="_blank" rel="noopener noreferrer" href="<?= htmlspecialchars($field['linkedin']) ?>"><?= htmlspecialchars($field['linkedin']) ?></a></dd><?php endif; ?>
           <?php if ($field['instagram']): ?><dt>Instagram</dt><dd><a target="_blank" rel="noopener noreferrer" href="<?= htmlspecialchars($field['instagram']) ?>"><?= htmlspecialchars($field['instagram']) ?></a></dd><?php endif; ?>

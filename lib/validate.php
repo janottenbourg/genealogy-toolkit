@@ -81,3 +81,13 @@ function stam_v_email_optional(?string $s): array {
     if ($s === '') return [true, ''];
     return stam_v_email($s);
 }
+
+/** Mobile/phone (optional). Permissive: empty OK, else 7-25 chars of digits/spaces/+/-/parens. */
+function stam_v_mobile_optional(?string $s): array {
+    $s = trim((string)$s);
+    if ($s === '') return [true, ''];
+    if (!preg_match('/^[\d\s+()\-]{7,25}$/', $s)) {
+        return [false, 'Ongeldig telefoonnummer (gebruik cijfers, spaties, +, -, of haakjes).'];
+    }
+    return [true, $s];
+}

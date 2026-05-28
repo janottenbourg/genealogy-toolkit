@@ -1,12 +1,12 @@
 :root {
-  --bg: #0b0f17;
-  --panel: #121826;
-  --panel2: #1a2233;
-  --border: #243049;
-  --text: #e6edf7;
-  --muted: #8a98b3;
-  --accent: #22d3ee;
-  --danger: #ef4444;
+  --bg: #faf8f4;          /* off-white, slight cream */
+  --panel: #ffffff;       /* pure white panels */
+  --panel2: #f5f1ea;      /* warm paper for inputs */
+  --border: #dcd6cb;      /* warm gray */
+  --text: #1f1e1c;        /* near-black */
+  --muted: #6b6863;       /* warm secondary gray */
+  --accent: #0e7c7b;      /* deep teal — links, focal */
+  --danger: #991b1b;      /* wine red */
   --card-w: 160px;
   --card-h: 88px;
 }
@@ -45,7 +45,7 @@ a:hover { text-decoration: underline; }
   border-radius: 7px; font: inherit; font-weight: 600; cursor: pointer; margin-top: 4px;
 }
 .err {
-  background: rgba(239,68,68,.12); border: 1px solid var(--danger); color: var(--danger);
+  background: rgba(153, 27, 27, .08); border: 1px solid var(--danger); color: var(--danger);
   padding: 8px 12px; border-radius: 7px; font-size: 12px;
 }
 
@@ -84,7 +84,7 @@ footer.build-info {
 .person-card .name { font-weight: 600; font-size: 13px; }
 .person-card .dates { color: var(--muted); font-size: 11px; margin-top: 2px; }
 .person-card.unknown { opacity: 0.45; font-style: italic; }
-.person-card.focal { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(34,211,238,.25); }
+.person-card.focal { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(14, 124, 123, .25); }
 
 /* ---------- hourglass grid ---------- */
 .hourglass {
@@ -141,11 +141,11 @@ footer.build-info {
 
 /* ---------- v2: toast ---------- */
 .toast {
-  background: rgba(34,211,238,.12); border: 1px solid var(--accent); color: var(--accent);
+  background: rgba(14, 124, 123, .08); border: 1px solid var(--accent); color: var(--accent);
   padding: 8px 12px; border-radius: 7px; font-size: 12px; margin-bottom: 12px;
 }
 .toast.err {
-  background: rgba(239,68,68,.12); border-color: var(--danger); color: var(--danger);
+  background: rgba(153, 27, 27, .08); border-color: var(--danger); color: var(--danger);
 }
 
 /* ---------- v2: audit footer ---------- */
@@ -171,6 +171,21 @@ footer.build-info {
 
 .admin-section { margin-bottom: 32px; }
 .admin-section h2 { margin-bottom: 8px; }
+
+.admin-tabs {
+  display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 16px 0 20px;
+  flex-wrap: wrap;
+}
+.admin-tab {
+  padding: 8px 14px; border: 1px solid transparent; border-bottom: none;
+  border-radius: 6px 6px 0 0; color: var(--muted); text-decoration: none;
+}
+.admin-tab:hover { color: var(--text); text-decoration: none; }
+.admin-tab.active {
+  background: var(--panel); color: var(--text); border-color: var(--border);
+  position: relative; top: 1px;
+  font-weight: 600;
+}
 
 /* ---------- v2: person augmentation block ---------- */
 .augment-block {

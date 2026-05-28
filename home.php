@@ -47,10 +47,6 @@ if ($built_at_nl !== '?') $built_at_nl = strftime_compat($built_at_nl);
 
   <p>Deze familiestamboom telt <strong><?= (int)($meta['individuals'] ?? 0) ?></strong>
      personen verspreid over <strong><?= (int)($meta['families'] ?? 0) ?></strong> gezinnen.</p>
-
-  <?php if ($root && (!$focal || $focal['id'] !== $root['id'])): ?>
-    <p><a href="boom.php?id=<?= htmlspecialchars($root['id']) ?>">→ Stamboom vanaf hoofdpersoon (<?= htmlspecialchars($root['name']['display'] ?? '') ?>)</a></p>
-  <?php endif; ?>
 </main>
 
 <footer class="build-info">

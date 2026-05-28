@@ -25,6 +25,7 @@ function stam_augment_for(string $indi_id): array {
     $e = $aug[$indi_id] ?? [];
     return [
         'email'      => $e['email']      ?? '',
+        'mobile'     => $e['mobile']     ?? '',
         'facebook'   => $e['facebook']   ?? '',
         'linkedin'   => $e['linkedin']   ?? '',
         'instagram'  => $e['instagram']  ?? '',
@@ -38,6 +39,7 @@ function stam_augment_for(string $indi_id): array {
 function stam_augment_has_any(string $indi_id): bool {
     $a = stam_augment_for($indi_id);
     return $a['email'] !== ''
+        || $a['mobile'] !== ''
         || $a['facebook'] !== ''
         || $a['linkedin'] !== ''
         || $a['instagram'] !== ''
@@ -54,6 +56,7 @@ function stam_augment_has_any(string $indi_id): bool {
 function stam_augment_save(string $indi_id, array $fields, string $updated_by): void {
     $stamped = [
         'email'      => (string)($fields['email']     ?? ''),
+        'mobile'     => (string)($fields['mobile']    ?? ''),
         'facebook'   => (string)($fields['facebook']  ?? ''),
         'linkedin'   => (string)($fields['linkedin']  ?? ''),
         'instagram'  => (string)($fields['instagram'] ?? ''),

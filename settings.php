@@ -21,6 +21,7 @@ $csrf   = csrfToken();
 $current = stam_augment_for($me_id);
 $field   = [
     'email'     => $current['email'],
+    'mobile'    => $current['mobile'],
     'facebook'  => $current['facebook'],
     'linkedin'  => $current['linkedin'],
     'instagram' => $current['instagram'],
@@ -41,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $next = $field;
     [$ok, $v] = stam_v_email_optional($_POST['email'] ?? '');
     $ok ? $next['email'] = $v : $errors[] = $v;
+
+    [$ok, $v] = stam_v_mobile_optional($_POST['mobile'] ?? '');
+    $ok ? $next['mobile'] = $v : $errors[] = $v;
 
     [$ok, $v] = stam_v_facebook($_POST['facebook'] ?? '');
     $ok ? $next['facebook'] = $v : $errors[] = $v;
@@ -69,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mijn gegevens | Stamboom Ottenbourg</title>
+<title>Mijn profiel | Stamboom Ottenbourg</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -77,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include __DIR__ . '/menu.php'; ?>
 
 <main class="page">
-  <h1>Mijn gegevens</h1>
+  <h1>Mijn profiel</h1>
   <p class="meta">Gekoppeld aan: <a href="persoon.php?id=<?= htmlspecialchars($me_id) ?>"><?= htmlspecialchars($me['name']['display']) ?></a></p>
 
   <?php if ($saved): ?><div class="toast">Opgeslagen.</div><?php endif; ?>
@@ -89,6 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
     <label for="email">E-mail (publiek voor familie)</label>
     <input id="email" name="email" type="email" value="<?= htmlspecialchars($field['email']) ?>">
+    <label for="mobile">Mobiel</label>
+    <input id="mobile" name="mobile" type="tel" value="<?= htmlspecialchars($field['mobile']) ?>">
     <label for="facebook">Facebook (https://…)</label>
     <input id="facebook" name="facebook" type="url" value="<?= htmlspecialchars($field['facebook']) ?>">
     <label for="linkedin">LinkedIn (https://…)</label>
