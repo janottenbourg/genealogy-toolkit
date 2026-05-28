@@ -118,3 +118,66 @@ footer.build-info {
   padding: 8px 12px; border-radius: 7px; font: inherit;
 }
 .search-results .person-card { width: 100%; max-width: 360px; align-items: flex-start; text-align: left; }
+
+/* ---------- v2: edit form ---------- */
+.edit-form {
+  display: grid; gap: 12px; max-width: 560px;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px;
+}
+.edit-form label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.edit-form input[type=text], .edit-form input[type=email], .edit-form input[type=url], .edit-form textarea {
+  background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+  padding: 8px 10px; border-radius: 6px; font: inherit; outline: none; width: 100%;
+}
+.edit-form input:focus, .edit-form textarea:focus { border-color: var(--accent); }
+.edit-form textarea { min-height: 140px; resize: vertical; }
+.edit-form .row { display: flex; gap: 8px; }
+.edit-form button {
+  background: var(--accent); color: var(--bg); border: none; padding: 8px 14px;
+  border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer;
+}
+.edit-form button.secondary { background: var(--panel2); color: var(--text); }
+
+/* ---------- v2: toast ---------- */
+.toast {
+  background: rgba(34,211,238,.12); border: 1px solid var(--accent); color: var(--accent);
+  padding: 8px 12px; border-radius: 7px; font-size: 12px; margin-bottom: 12px;
+}
+.toast.err {
+  background: rgba(239,68,68,.12); border-color: var(--danger); color: var(--danger);
+}
+
+/* ---------- v2: audit footer ---------- */
+.audit-footer {
+  color: var(--muted); font-size: 11px; margin-top: 8px; font-style: italic;
+}
+
+/* ---------- v2: admin table ---------- */
+.admin-table {
+  width: 100%; border-collapse: collapse; margin: 12px 0;
+}
+.admin-table th, .admin-table td {
+  text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.admin-table th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; }
+.admin-table .actions form { display: inline; }
+.admin-table .actions button {
+  background: transparent; color: var(--accent); border: 1px solid var(--accent);
+  padding: 4px 8px; border-radius: 5px; font: inherit; font-size: 12px; cursor: pointer; margin-right: 4px;
+}
+.admin-table .actions button.danger { color: var(--danger); border-color: var(--danger); }
+
+.admin-section { margin-bottom: 32px; }
+.admin-section h2 { margin-bottom: 8px; }
+
+/* ---------- v2: person augmentation block ---------- */
+.augment-block {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 16px; margin: 12px 0;
+}
+.augment-block h3 { margin: 0 0 8px; font-size: 14px; }
+.augment-block dl { display: grid; grid-template-columns: 120px 1fr; gap: 4px 12px; margin: 0; }
+.augment-block dt { color: var(--muted); }
+.augment-block .bio { white-space: pre-wrap; }
