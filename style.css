@@ -1,12 +1,12 @@
 :root {
-  --bg: #faf8f4;          /* off-white, slight cream */
-  --panel: #ffffff;       /* pure white panels */
-  --panel2: #f5f1ea;      /* warm paper for inputs */
-  --border: #dcd6cb;      /* warm gray */
-  --text: #1f1e1c;        /* near-black */
-  --muted: #6b6863;       /* warm secondary gray */
-  --accent: #0e7c7b;      /* deep teal — links, focal */
-  --danger: #991b1b;      /* wine red */
+  --bg: #ffffff;          /* white */
+  --panel: #ffffff;       /* white panels (separated by borders) */
+  --panel2: #f2f2f2;      /* light gray — inputs, hover, subtle fills */
+  --border: #cccccc;      /* neutral hairline gray */
+  --text: #111111;        /* near-black */
+  --muted: #666666;       /* neutral mid-gray — secondary text */
+  --accent: #111111;      /* black — buttons, active states, focal highlight */
+  --danger: #111111;      /* black — strict monochrome (emphasis via weight/fill) */
   --card-w: 160px;
   --card-h: 88px;
 }
@@ -18,8 +18,13 @@ body {
   background: var(--bg);
   color: var(--text);
 }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
+
+/* Content links: black, underlined; underline removed on hover. */
+a { color: var(--text); text-decoration: underline; }
+a:hover { text-decoration: none; }
+/* Chrome links (nav, cards, tabs) are buttons/structure, not text links — no underline. */
+.topnav a, .person-card, .admin-tab { text-decoration: none; }
+.topnav a:hover, .person-card:hover, .admin-tab:hover { text-decoration: none; }
 
 /* ---------- login ---------- */
 .login-page {
@@ -39,14 +44,14 @@ a:hover { text-decoration: underline; }
   background: var(--panel2); border: 1px solid var(--border); color: var(--text);
   padding: 10px 12px; border-radius: 7px; font: inherit; outline: none;
 }
-.login-card input:focus { border-color: var(--accent); }
+.login-card input:focus { border-color: var(--text); }
 .login-card button {
   background: var(--accent); color: var(--bg); border: none; padding: 10px 16px;
   border-radius: 7px; font: inherit; font-weight: 600; cursor: pointer; margin-top: 4px;
 }
 .err {
-  background: rgba(153, 27, 27, .08); border: 1px solid var(--danger); color: var(--danger);
-  padding: 8px 12px; border-radius: 7px; font-size: 12px;
+  background: var(--panel2); border: 1px solid var(--text); color: var(--text);
+  padding: 8px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
 }
 
 /* ---------- nav ---------- */
@@ -58,7 +63,7 @@ a:hover { text-decoration: underline; }
 .topnav a {
   padding: 6px 12px; border-radius: 6px; color: var(--text);
 }
-.topnav a:hover { background: var(--panel2); text-decoration: none; }
+.topnav a:hover { background: var(--panel2); }
 .topnav a[aria-current="page"] {
   background: var(--accent); color: var(--bg); font-weight: 600;
 }
@@ -80,11 +85,11 @@ footer.build-info {
   background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
   padding: 8px; text-align: center; color: var(--text);
 }
-.person-card:hover { border-color: var(--accent); text-decoration: none; }
+.person-card:hover { border-color: var(--text); }
 .person-card .name { font-weight: 600; font-size: 13px; }
 .person-card .dates { color: var(--muted); font-size: 11px; margin-top: 2px; }
 .person-card.unknown { opacity: 0.45; font-style: italic; }
-.person-card.focal { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(14, 124, 123, .25); }
+.person-card.focal { border-color: var(--text); box-shadow: 0 0 0 2px rgba(17, 17, 17, .2); }
 
 /* ---------- hourglass grid ---------- */
 .hourglass {
@@ -109,7 +114,7 @@ footer.build-info {
 /* ---------- list view ---------- */
 .tree-list details { padding-left: 16px; border-left: 1px dashed var(--border); }
 .tree-list summary { cursor: pointer; padding: 4px 0; }
-.tree-list summary:hover { color: var(--accent); }
+.tree-list summary:hover { color: var(--text); }
 
 /* ---------- search ---------- */
 .search-form { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -126,11 +131,11 @@ footer.build-info {
   border-radius: 8px; padding: 16px;
 }
 .edit-form label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-.edit-form input[type=text], .edit-form input[type=email], .edit-form input[type=url], .edit-form textarea {
+.edit-form input[type=text], .edit-form input[type=email], .edit-form input[type=url], .edit-form input[type=tel], .edit-form textarea {
   background: var(--panel2); border: 1px solid var(--border); color: var(--text);
   padding: 8px 10px; border-radius: 6px; font: inherit; outline: none; width: 100%;
 }
-.edit-form input:focus, .edit-form textarea:focus { border-color: var(--accent); }
+.edit-form input:focus, .edit-form textarea:focus { border-color: var(--text); }
 .edit-form textarea { min-height: 140px; resize: vertical; }
 .edit-form .row { display: flex; gap: 8px; }
 .edit-form button {
@@ -141,12 +146,10 @@ footer.build-info {
 
 /* ---------- v2: toast ---------- */
 .toast {
-  background: rgba(14, 124, 123, .08); border: 1px solid var(--accent); color: var(--accent);
+  background: var(--panel2); border: 1px solid var(--text); color: var(--text);
   padding: 8px 12px; border-radius: 7px; font-size: 12px; margin-bottom: 12px;
 }
-.toast.err {
-  background: rgba(153, 27, 27, .08); border-color: var(--danger); color: var(--danger);
-}
+.toast.err { font-weight: 600; }
 
 /* ---------- v2: audit footer ---------- */
 .audit-footer {
@@ -164,10 +167,10 @@ footer.build-info {
 .admin-table th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; }
 .admin-table .actions form { display: inline; }
 .admin-table .actions button {
-  background: transparent; color: var(--accent); border: 1px solid var(--accent);
+  background: transparent; color: var(--text); border: 1px solid var(--text);
   padding: 4px 8px; border-radius: 5px; font: inherit; font-size: 12px; cursor: pointer; margin-right: 4px;
 }
-.admin-table .actions button.danger { color: var(--danger); border-color: var(--danger); }
+.admin-table .actions button.danger { background: var(--text); color: var(--bg); border-color: var(--text); }
 
 .admin-section { margin-bottom: 32px; }
 .admin-section h2 { margin-bottom: 8px; }
@@ -180,7 +183,7 @@ footer.build-info {
   padding: 8px 14px; border: 1px solid transparent; border-bottom: none;
   border-radius: 6px 6px 0 0; color: var(--muted); text-decoration: none;
 }
-.admin-tab:hover { color: var(--text); text-decoration: none; }
+.admin-tab:hover { color: var(--text); }
 .admin-tab.active {
   background: var(--panel); color: var(--text); border-color: var(--border);
   position: relative; top: 1px;
