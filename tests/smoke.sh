@@ -51,9 +51,10 @@ trap cleanup EXIT
 echo "==> $PY build.py sample.ged"
 "$PY" build.py sample.ged
 
-# --- 2. Ensure .password exists (default 'changeme' for tests only) ---
-if [[ ! -s .password ]]; then
-    "$PHP" -r 'echo password_hash("changeme", PASSWORD_BCRYPT);' > .password
+# --- 2. Ensure admin test account (admin@test.local / changeme — for tests only) ---
+if [[ ! -s users.json ]] || ! grep -q "admin@test.local" users.json; then
+    rm -f users.json   # so seed_admin doesn't reject a stale account
+    "$PHP" tools/seed_admin.php --email=admin@test.local --password=changeme --indi=I1 || true
 fi
 
 # --- 3. Boot server ---
@@ -93,9 +94,13 @@ assert_status() {
 # --- 4. Login flow ---
 echo "==> Login flow"
 assert_status "/" 200 "Login page reachable"
-curl -s -o /dev/null -c "$COOKIES" -d "password=wrong" "$BASE/login.php"
+# Pull CSRF token from index.php first
+CSRF=$(curl -s -c "$COOKIES" "$BASE/" | grep -oP 'name="_csrf" value="\K[^"]+' | head -1)
+curl -s -o /dev/null -b "$COOKIES" -c "$COOKIES" \
+    -d "email=admin@test.local&password=wrong&_csrf=$CSRF" "$BASE/login.php"
 assert_status "/home.php" 302 "Unauthenticated home redirects"
-curl -s -o /dev/null -c "$COOKIES" -b "$COOKIES" -d "password=changeme" "$BASE/login.php"
+curl -s -o /dev/null -b "$COOKIES" -c "$COOKIES" \
+    -d "email=admin@test.local&password=changeme&_csrf=$CSRF" "$BASE/login.php"
 
 # --- 5. Authenticated routes ---
 echo "==> Authenticated routes"
