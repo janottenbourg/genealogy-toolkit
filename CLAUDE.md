@@ -32,7 +32,17 @@ Public code repo: `janottenbourg/genealogy-toolkit`.
 - `lijst.php`
 - `zoek.php?q=...`
 
-## Deploy (single file, `/jan/` style)
+## Deploy (v2)
+
+Use the script:
+
+```bash
+bash deploy-to-lightsail.sh
+```
+
+This pulls main on the box, rsyncs to the webroot (excluding `users.json`, `augment.json`, `invites.json`, `tree.json`, `jottenbourg.ged` — state files), and pulls the JSON files back locally per the `feedback_deploy_download_json.md` memory rule.
+
+For a one-off single file, the /jan/-style scp+install also still works:
 
 ```bash
 scp <file> ubuntu@tienen.rip:/tmp/stamboom-<file>
@@ -57,14 +67,7 @@ ssh ubuntu@tienen.rip "sudo install -o www-data -g www-data -m 644 \
 
 ## Open follow-ups (v2 sub-projects)
 
-- **`stamboom-auth` (per-user accounts)** — replace the single shared password
-  with per-user accounts. Admin role = Jan (full access). User role = family
-  members with limited access (definition of "limited" TBD: photo-only? hide
-  birthdates of living relatives? read-only-no-search?). Needs its own
-  brainstorm/spec session — see `docs/superpowers/specs/2026-05-28-stamboom-design.md`
-  §10 for the deferred sub-project list.
-- **`stamboom-augment`** — `_LINKEDIN`/`_FACEBOOK`/`_EMAIL` annotations on
-  individuals, with .ged roundtrip.
+- **`stamboom-augment-export`** — round-trip augmentation (email/FB/LinkedIn/Insta/bio) into `.ged` underscore tags so Geneanet imports preserve it. Currently augmentation lives only in `augment.json`.
 - **`stamboom-contributions`** — photo and PDF uploads.
 - **`stamboom-analytics`** — KPI dashboards à la `benardt/genealogyKPI`.
 - **`stamboom-ai-checks`** — AI-assisted issue detection.
