@@ -156,3 +156,49 @@ def test_find_span_locates_stamboom_note_with_cont_lines():
     ]
     span = ea.find_stamboom_note_span(record)
     assert span == (2, 5)  # covers index 2,3,4; ends before "1 SEX M" at 5
+
+
+def test_merge_adds_block_when_absent():
+    record = ["0 @I1@ INDI", "1 NAME Jan /Test/", "1 SEX M"]
+    new, action = ea.merge_record(record, {"email": "a@b.com"})
+    assert action == "added"
+    assert new[:3] == record  # original lines preserved, block appended after
+    assert new[3] == "1 NOTE " + ea.BEGIN_MARKER
+    assert new[-1] == "2 CONT " + ea.END_MARKER
+
+
+def test_merge_updates_existing_block_and_keeps_real_note():
+    record = [
+        "0 @I1@ INDI",
+        "1 NOTE Echte genealogische notitie",
+        "1 NOTE " + ea.BEGIN_MARKER,
+        "2 CONT E-mail: old@@x.com",
+        "2 CONT " + ea.END_MARKER,
+        "1 SEX M",
+    ]
+    new, action = ea.merge_record(record, {"email": "new@x.com"})
+    assert action == "updated"
+    assert "1 NOTE Echte genealogische notitie" in new  # untouched
+    assert "2 CONT E-mail: new@@x.com" in new
+    assert not any("old@@x.com" in ln for ln in new)
+    assert sum(1 for ln in new if ln == "1 NOTE " + ea.BEGIN_MARKER) == 1
+
+
+def test_merge_removes_block_when_all_cleared():
+    record = [
+        "0 @I1@ INDI",
+        "1 NOTE " + ea.BEGIN_MARKER,
+        "2 CONT E-mail: a@@b.com",
+        "2 CONT " + ea.END_MARKER,
+        "1 SEX M",
+    ]
+    new, action = ea.merge_record(record, {"email": "", "bio": ""})
+    assert action == "removed"
+    assert new == ["0 @I1@ INDI", "1 SEX M"]
+
+
+def test_merge_noop_when_no_fields_and_no_block():
+    record = ["0 @I1@ INDI", "1 SEX M"]
+    new, action = ea.merge_record(record, {})
+    assert action == "noop"
+    assert new == record

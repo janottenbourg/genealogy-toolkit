@@ -132,6 +132,22 @@ def record_header(record: list[str]) -> tuple[str | None, str]:
     return None, ""
 
 
+def merge_record(record: list[str], aug: dict) -> tuple[list[str], str]:
+    """Apply augmentation to one INDI record. Returns (new_lines, action)
+    where action ∈ {'added','updated','removed','noop'}."""
+    span = find_stamboom_note_span(record)
+    if has_any(aug):
+        block = build_block_lines(aug)
+        if span:
+            s, e = span
+            return record[:s] + block + record[e:], "updated"
+        return record + block, "added"
+    if span:
+        s, e = span
+        return record[:s] + record[e:], "removed"
+    return record, "noop"
+
+
 def find_stamboom_note_span(record: list[str]) -> tuple[int, int] | None:
     """Return (start, end) line indices of the dedicated stamboom NOTE
     (the one whose first logical line is BEGIN_MARKER), or None. `end` is
