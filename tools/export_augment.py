@@ -53,3 +53,18 @@ def split_value(s: str, max_bytes: int = MAX_VALUE_BYTES) -> list[str]:
         cur_bytes += b
     chunks.append("".join(cur))
     return chunks
+
+
+def encode_logical_lines(logical_lines: list[str]) -> list[str]:
+    """Encode logical NOTE lines into physical GEDCOM lines.
+    First logical line → '1 NOTE ...'; the rest → '2 CONT ...'.
+    Over-long logical lines spill into '2 CONC ...' continuations.
+    An empty value emits the bare tag with no trailing space."""
+    out: list[str] = []
+    for i, ll in enumerate(logical_lines):
+        chunks = split_value(ll)
+        lvl, tag = ("1", "NOTE") if i == 0 else ("2", "CONT")
+        out.append(f"{lvl} {tag} {chunks[0]}" if chunks[0] != "" else f"{lvl} {tag}")
+        for c in chunks[1:]:
+            out.append(f"2 CONC {c}" if c != "" else "2 CONC")
+    return out
