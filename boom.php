@@ -38,6 +38,8 @@ $active_nav = 'boom';
   </noscript>
 </main>
 
+<?php include __DIR__ . '/footer.php'; ?>
+
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/family-chart@0.9.0/dist/family-chart.min.js"></script>
 <script src="js/familytree.js"></script>
