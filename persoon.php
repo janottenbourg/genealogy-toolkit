@@ -209,7 +209,10 @@ function person_card_link(array $p): string {
       </div></section>
     <?php endif; ?>
 
-    <p><a href="boom.php?id=<?= htmlspecialchars($id) ?>">→ Toon in stamboom-weergave</a></p>
+    <p>
+      <a href="boom.php?id=<?= htmlspecialchars($id) ?>">→ Toon in stamboom-weergave</a> ·
+      <a href="voorouders.php?id=<?= htmlspecialchars($id) ?>">→ Voorouders (stamreeks)</a>
+    </p>
   <?php endif; ?>
 </main>
 
