@@ -264,3 +264,26 @@ def test_main_rejects_in_place_with_out(tmp_path):
     g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com"}})
     r = _run(tmp_path, g, a, args=("--in-place", "--out", str(tmp_path / "x.ged")))
     assert r.returncode == 2
+
+
+def test_main_relative_out_aliasing_input_is_rejected(tmp_path):
+    # Absolute input + relative --out that resolves to the SAME file must be
+    # rejected (exit 2), never silently overwriting the input.
+    g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com"}})
+    before = g.read_bytes()
+    r = subprocess.run(
+        [sys.executable, str(TOOL), str(g), "--augment", str(a), "--out", "in.ged"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert r.returncode == 2, r.stderr
+    assert g.read_bytes() == before  # input untouched
+
+
+def test_main_non_dict_augmentations_exits_2(tmp_path):
+    g = tmp_path / "in.ged"
+    g.write_bytes(SAMPLE.read_bytes())
+    a = tmp_path / "augment.json"
+    a.write_text(json.dumps({"augmentations": ["not", "a", "dict"]}), encoding="utf-8")
+    r = _run(tmp_path, g, a)
+    assert r.returncode == 2
+    assert "augmentations" in r.stderr.lower()

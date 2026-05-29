@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
         args.out if args.out is not None
         else args.ged.with_name(args.ged.stem + "_augmented" + args.ged.suffix)
     )
-    if out_path == args.ged and not args.in_place:
+    if out_path.resolve() == args.ged.resolve() and not args.in_place:
         print("error: --out equals input; use --in-place to overwrite",
               file=sys.stderr)
         return 2
@@ -221,6 +221,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: cannot read {args.augment}: {e}", file=sys.stderr)
         return 2
     augmentations = aug_data.get("augmentations", {})
+    if not isinstance(augmentations, dict):
+        print("error: augment.json 'augmentations' must be an object",
+              file=sys.stderr)
+        return 2
 
     try:
         text, nl, had_trailing = _read_text(args.ged)
