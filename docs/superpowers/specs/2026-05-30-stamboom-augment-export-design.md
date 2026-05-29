@@ -109,9 +109,11 @@ Rules:
 
 - **Line structure**: first physical line is `1 NOTE <text>`; every
   subsequent logical line is `2 CONT <text>` (GeneWeb's own convention).
-- **Long lines**: any logical line whose `<text>` exceeds 255 **bytes** in
-  UTF-8 is split with `2 CONC` continuations. Splits never fall inside a
-  multibyte UTF-8 sequence.
+- **Long lines**: any logical line whose `<text>` exceeds a conservative
+  **200-byte** UTF-8 budget is split with `2 CONC` continuations (200 keeps
+  the whole physical line, including the `2 CONC ` prefix, well under the
+  GEDCOM 5.5.1 255-char line limit). Splits never fall inside a multibyte
+  UTF-8 sequence.
 - **`@` escaping**: a literal `@` in a value is doubled to `@@` per GEDCOM
   5.5.1 (matters for email addresses). The round-trip test verifies GeneWeb
   reads it back as a single `@`.
