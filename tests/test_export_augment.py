@@ -65,3 +65,47 @@ def test_encode_long_line_uses_conc():
     out = ea.encode_logical_lines([long])
     assert out[0] == "1 NOTE " + "x" * 200
     assert out[1] == "2 CONC " + "x" * 50
+
+
+def test_has_any_true_when_one_field_set():
+    assert ea.has_any({"email": "x@y.com"}) is True
+    assert ea.has_any({"bio": "hi"}) is True
+
+
+def test_has_any_false_when_all_empty_or_whitespace():
+    assert ea.has_any({}) is False
+    assert ea.has_any({"email": "", "bio": "  "}) is False
+
+
+def test_build_block_omits_empty_fields_and_uses_dutch_labels():
+    block = ea.build_block_lines({
+        "email": "jan@ottenbourg.com",
+        "mobile": "",
+        "facebook": "https://facebook.com/janottenbourg",
+        "linkedin": "",
+        "instagram": "",
+        "bio": "",
+    })
+    assert block[0] == "1 NOTE " + ea.BEGIN_MARKER
+    assert "2 CONT E-mail: jan@@ottenbourg.com" in block
+    assert "2 CONT Facebook: https://facebook.com/janottenbourg" in block
+    assert block[-1] == "2 CONT " + ea.END_MARKER
+    # No empty fields emitted:
+    assert not any("Mobiel:" in ln for ln in block)
+    assert not any("LinkedIn:" in ln for ln in block)
+
+
+def test_build_block_multiline_bio_becomes_multiple_cont():
+    block = ea.build_block_lines({"bio": "Regel een.\nRegel twee."})
+    assert "2 CONT Bio: Regel een." in block
+    assert "2 CONT Regel twee." in block
+
+
+def test_build_block_field_order_is_deterministic():
+    block = ea.build_block_lines({
+        "instagram": "https://instagram.com/x",
+        "email": "a@b.com",
+    })
+    email_idx = next(i for i, ln in enumerate(block) if "E-mail:" in ln)
+    insta_idx = next(i for i, ln in enumerate(block) if "Instagram:" in ln)
+    assert email_idx < insta_idx

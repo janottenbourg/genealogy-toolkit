@@ -68,3 +68,33 @@ def encode_logical_lines(logical_lines: list[str]) -> list[str]:
         for c in chunks[1:]:
             out.append(f"2 CONC {c}" if c != "" else "2 CONC")
     return out
+
+
+def _bio_of(aug: dict) -> str:
+    bio = str(aug.get("bio") or "")
+    return bio.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def has_any(aug: dict) -> bool:
+    """True if at least one user-visible augmentation field is non-empty."""
+    if _bio_of(aug).strip() != "":
+        return True
+    return any(str(aug.get(k) or "").strip() != "" for k, _ in FIELDS)
+
+
+def build_block_lines(aug: dict) -> list[str]:
+    """Augmentation dict → physical GEDCOM lines for the stamboom NOTE block.
+    Only non-empty fields are emitted, in FIELDS order, then bio."""
+    logical = [BEGIN_MARKER]
+    for key, label in FIELDS:
+        val = str(aug.get(key) or "").strip()
+        if val != "":
+            logical.append(f"{label}: {escape_at(val)}")
+    bio = _bio_of(aug)
+    if bio.strip() != "":
+        bio_lines = bio.split("\n")
+        logical.append(f"Bio: {escape_at(bio_lines[0])}")
+        for extra in bio_lines[1:]:
+            logical.append(escape_at(extra))
+    logical.append(END_MARKER)
+    return encode_logical_lines(logical)
