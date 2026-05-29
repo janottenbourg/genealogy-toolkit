@@ -1,6 +1,7 @@
 # Private family data — NEVER commit
 jottenbourg.ged
 *.ged.bak
+*_augmented.ged
 
 # Build artifacts
 tree.json

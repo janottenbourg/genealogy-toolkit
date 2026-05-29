@@ -28,6 +28,9 @@ jobs:
       - name: pytest (parser)
         run: pytest tests/test_build.py -v
 
+      - name: pytest (augment-export)
+        run: pytest tests/test_export_augment.py -v
+
       - name: canEdit unit
         run: |
           python3 build.py sample.ged > /dev/null

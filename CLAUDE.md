@@ -58,6 +58,25 @@ ssh ubuntu@tienen.rip "sudo install -o www-data -g www-data -m 644 \
 3. ssh "cd /var/www/stamboom.ottenbourg.com && sudo -u www-data python3 build.py jottenbourg.ged" on the box
 4. Verify footer date updated on home page
 
+## Augment export (augment.json → GEDCOM)
+
+`augment.json` (email/mobile/socials/bio entered via the web app) can be
+merged into the GEDCOM as one marker-fenced `NOTE` per person:
+
+```bash
+python3 tools/export_augment.py jottenbourg.ged --augment augment.json
+# writes jottenbourg_augmented.ged (input untouched); --in-place to overwrite
+```
+
+`augment.json` is authoritative — the export always overwrites/removes its
+own `-- stamboom-augment begin/end --` block; genealogical notes are left
+intact; re-runs are idempotent (byte-identical output).
+
+**Manual GeneWeb round-trip check** (Geneanet runs GeneWeb 7.0, which keeps
+notes but drops EMAIL/WWW tags): import `jottenbourg_augmented.ged` into a
+local GeneWeb (`ged2gwb`) and re-export (`gwb2ged`); confirm the stamboom
+NOTE block survives intact. Not part of CI.
+
 ## Pre-deploy checklist
 - [ ] Login with wrong then right password
 - [ ] Click 3 generations up and 3 down from yourself
@@ -70,7 +89,8 @@ ssh ubuntu@tienen.rip "sudo install -o www-data -g www-data -m 644 \
 
 ## Open follow-ups (v2 sub-projects)
 
-- **`stamboom-augment-export`** — round-trip augmentation (email/FB/LinkedIn/Insta/bio) into `.ged` underscore tags so Geneanet imports preserve it. Currently augmentation lives only in `augment.json`.
+- ~~**`stamboom-augment-export`**~~ — DONE 2026-05-30. `tools/export_augment.py`
+  merges augment.json into the GEDCOM as a marker-fenced NOTE per person.
 - **`stamboom-contributions`** — photo and PDF uploads.
 - **`stamboom-analytics`** — KPI dashboards à la `benardt/genealogyKPI`.
 - **`stamboom-ai-checks`** — AI-assisted issue detection.
