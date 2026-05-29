@@ -130,3 +130,27 @@ def record_header(record: list[str]) -> tuple[str | None, str]:
     if len(parts) >= 2:
         return None, parts[1].strip()
     return None, ""
+
+
+def find_stamboom_note_span(record: list[str]) -> tuple[int, int] | None:
+    """Return (start, end) line indices of the dedicated stamboom NOTE
+    (the one whose first logical line is BEGIN_MARKER), or None. `end` is
+    exclusive. The span covers the '1 NOTE' line and its level≥2 children."""
+    n = len(record)
+    i = 0
+    while i < n:
+        if record[i].startswith("1 NOTE"):
+            first_val = record[i][len("1 NOTE"):].lstrip(" ")
+            j = i + 1
+            while j < n:
+                lvl = record[j].split(" ", 1)[0]
+                if lvl.isdigit() and int(lvl) >= 2:
+                    j += 1
+                else:
+                    break
+            if first_val.replace("@@", "@") == BEGIN_MARKER:
+                return (i, j)
+            i = j
+        else:
+            i += 1
+    return None

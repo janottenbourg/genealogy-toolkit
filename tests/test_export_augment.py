@@ -133,3 +133,26 @@ def test_record_header_indi():
 def test_record_header_head_and_trlr():
     assert ea.record_header(["0 HEAD"]) == (None, "HEAD")
     assert ea.record_header(["0 TRLR"]) == (None, "TRLR")
+
+
+def test_find_span_none_when_no_note():
+    record = ["0 @I1@ INDI", "1 NAME Jan /Test/", "1 SEX M"]
+    assert ea.find_stamboom_note_span(record) is None
+
+
+def test_find_span_ignores_genealogical_note():
+    record = ["0 @I1@ INDI", "1 NOTE A normal family note", "1 SEX M"]
+    assert ea.find_stamboom_note_span(record) is None
+
+
+def test_find_span_locates_stamboom_note_with_cont_lines():
+    record = [
+        "0 @I1@ INDI",
+        "1 NAME Jan /Test/",
+        "1 NOTE " + ea.BEGIN_MARKER,
+        "2 CONT E-mail: a@@b.com",
+        "2 CONT " + ea.END_MARKER,
+        "1 SEX M",
+    ]
+    span = ea.find_stamboom_note_span(record)
+    assert span == (2, 5)  # covers index 2,3,4; ends before "1 SEX M" at 5
