@@ -109,3 +109,27 @@ def test_build_block_field_order_is_deterministic():
     email_idx = next(i for i, ln in enumerate(block) if "E-mail:" in ln)
     insta_idx = next(i for i, ln in enumerate(block) if "Instagram:" in ln)
     assert email_idx < insta_idx
+
+
+def test_parse_records_groups_by_level_zero():
+    lines = [
+        "0 HEAD",
+        "1 SOUR Geneanet",
+        "0 @I1@ INDI",
+        "1 NAME Jan /Test/",
+        "0 TRLR",
+    ]
+    recs = ea.parse_records(lines)
+    assert len(recs) == 3
+    assert recs[0] == ["0 HEAD", "1 SOUR Geneanet"]
+    assert recs[1] == ["0 @I1@ INDI", "1 NAME Jan /Test/"]
+    assert recs[2] == ["0 TRLR"]
+
+
+def test_record_header_indi():
+    assert ea.record_header(["0 @I7@ INDI", "1 NAME x"]) == ("I7", "INDI")
+
+
+def test_record_header_head_and_trlr():
+    assert ea.record_header(["0 HEAD"]) == (None, "HEAD")
+    assert ea.record_header(["0 TRLR"]) == (None, "TRLR")

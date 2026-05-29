@@ -98,3 +98,35 @@ def build_block_lines(aug: dict) -> list[str]:
             logical.append(escape_at(extra))
     logical.append(END_MARKER)
     return encode_logical_lines(logical)
+
+
+def parse_records(lines: list[str]) -> list[list[str]]:
+    """Group physical lines into records. A new record starts at each
+    level-0 line. Every line is preserved verbatim in some record."""
+    records: list[list[str]] = []
+    cur: list[str] = []
+    for line in lines:
+        lvl = line.split(" ", 1)[0] if line else ""
+        if lvl == "0":
+            if cur:
+                records.append(cur)
+            cur = [line]
+        else:
+            if not cur:
+                cur = [line]  # stray leading line (shouldn't happen) — keep it
+            else:
+                cur.append(line)
+    if cur:
+        records.append(cur)
+    return records
+
+
+def record_header(record: list[str]) -> tuple[str | None, str]:
+    """Return (xref_id_without_@, type) from a record's level-0 line.
+    HEAD/TRLR have no xref → (None, 'HEAD')."""
+    parts = record[0].split(" ", 2)
+    if len(parts) >= 3 and parts[1].startswith("@"):
+        return parts[1].strip("@"), parts[2].strip()
+    if len(parts) >= 2:
+        return None, parts[1].strip()
+    return None, ""
