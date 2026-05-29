@@ -148,6 +148,20 @@ curl -s -o /dev/null -b /tmp/c4 -c /tmp/c4 \
 code=$(curl -s -o /dev/null -w "%{http_code}" -b /tmp/c4 "$BASE/home.php")
 [[ "$code" == "200" ]] && echo "  PASS  login with new password" && ((pass++)) || { echo "  FAIL"; ((fail++)); }
 
+echo "==> boom.php chart shell + boom_data.php JSON + voorouders pedigree"
+B=$(curl -s -b "$COOKIES_ADMIN" "$BASE/boom.php?id=I3")
+echo "$B" | grep -q 'id="famtree"'      && { echo "  PASS  boom.php has chart container"; ((pass++)); } || { echo "  FAIL  no #famtree"; ((fail++)); }
+echo "$B" | grep -q 'js/familytree.js'   && { echo "  PASS  boom.php loads familytree.js"; ((pass++)); } || { echo "  FAIL"; ((fail++)); }
+echo "$B" | grep -q 'family-chart@0.9.0' && { echo "  PASS  boom.php loads family-chart CDN"; ((pass++)); } || { echo "  FAIL"; ((fail++)); }
+
+BD=$(curl -s -b "$COOKIES_ADMIN" "$BASE/boom_data.php")
+echo "$BD" | grep -q '"I3"' && echo "$BD" | grep -q 'Marcel' && { echo "  PASS  boom_data.php has I3/Marcel"; ((pass++)); } || { echo "  FAIL  boom_data missing I3/Marcel"; ((fail++)); }
+printf '%s' "$BD" | "$PHP" -r '$d=json_decode(stream_get_contents(STDIN),true); exit(is_array($d)&&count($d)===15?0:1);' && { echo "  PASS  boom_data valid JSON (15)"; ((pass++)); } || { echo "  FAIL  boom_data bad JSON"; ((fail++)); }
+
+curl -s -b "$COOKIES_ADMIN" "$BASE/voorouders.php?id=I3" | grep -q 'Désiré' && { echo "  PASS  voorouders shows ancestor"; ((pass++)); } || { echo "  FAIL  voorouders no ancestor"; ((fail++)); }
+vcode=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIES_ADMIN" "$BASE/voorouders.php?id=I999")
+[ "$vcode" = "404" ] && { echo "  PASS  voorouders unknown → 404"; ((pass++)); } || { echo "  FAIL  voorouders unknown → $vcode"; ((fail++)); }
+
 echo "==> PHP error log scan"
 if grep -E "PHP (Fatal|Warning|Notice|Parse)" "$PHP_LOG"; then
     echo "  FAIL  PHP errors:"

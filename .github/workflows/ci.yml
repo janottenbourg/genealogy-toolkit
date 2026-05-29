@@ -33,6 +33,16 @@ jobs:
           python3 build.py sample.ged > /dev/null
           php tests/test_can_edit.php
 
+      - name: famtree mapping unit
+        run: |
+          python3 build.py sample.ged > /dev/null
+          php tests/test_boom_data.php
+
+      - name: pedigree render unit
+        run: |
+          python3 build.py sample.ged > /dev/null
+          php tests/test_pedigree.php
+
       - name: smoke v1
         run: bash tests/smoke.sh
 
