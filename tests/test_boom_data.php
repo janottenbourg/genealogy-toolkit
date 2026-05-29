@@ -25,8 +25,8 @@ check(count($data) === 15, 'array length 15');
 check(isset($by['I3']), 'I3 present');
 
 $m = $by['I3'];
-check(($m['rels']['father'] ?? null) === 'I1', 'I3 father = I1');
-check(($m['rels']['mother'] ?? null) === 'I2', 'I3 mother = I2');
+$par = $m['rels']['parents']; sort($par);
+check($par === ['I1', 'I2'], 'I3 parents = I1,I2');
 $sp = $m['rels']['spouses']; sort($sp);
 check($sp === ['I6', 'I8'], 'I3 spouses = I6,I8');
 $ch = $m['rels']['children']; sort($ch);
@@ -34,9 +34,9 @@ check($ch === ['I10', 'I7', 'I9'], 'I3 children = I7,I9,I10');
 check(($m['data']['name'] ?? '') === 'Marcel Janssens', 'I3 data.name');
 check(($m['data']['gender'] ?? '') === 'M', 'I3 gender M');
 
-// I1 (Désiré) has no parents_family in the fixture → no father/mother keys.
+// I1 (Désiré) has no parents_family in the fixture → empty parents array.
 $d = $by['I1'];
-check(!isset($d['rels']['father']) && !isset($d['rels']['mother']), 'I1 has no parent keys');
+check(($d['rels']['parents'] ?? null) === [], 'I1 has empty parents array');
 check(($d['data']['name'] ?? '') === 'Désiré Janssens', 'I1 diacritics preserved');
 
 echo "\nSummary: $pass passed, $fail failed\n";

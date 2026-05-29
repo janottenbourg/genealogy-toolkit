@@ -1,6 +1,6 @@
 <?php
 // Build the family-chart data array from tree.json.
-// Node shape: { id, data:{name,dates,gender}, rels:{father?,mother?,spouses[],children[]} }
+// Node shape: { id, data:{name,dates,gender}, rels:{parents[],spouses[],children[]} }
 // Only name/dates/sex/relationships — NO augmentation (email/socials/bio).
 
 require_once __DIR__ . '/tree.php';
@@ -9,13 +9,13 @@ function stam_famtree_data(): array {
     $t = stam_load_tree();
     $out = [];
     foreach ($t['individuals'] as $id => $ind) {
-        $rels = ['spouses' => [], 'children' => []];
+        $rels = ['parents' => [], 'spouses' => [], 'children' => []];
 
         if (!empty($ind['parents_family'])) {
             $pf = stam_family($ind['parents_family']);
             if ($pf) {
-                if (!empty($pf['husband'])) $rels['father'] = $pf['husband'];
-                if (!empty($pf['wife']))    $rels['mother'] = $pf['wife'];
+                if (!empty($pf['husband'])) $rels['parents'][] = $pf['husband'];
+                if (!empty($pf['wife']))    $rels['parents'][] = $pf['wife'];
             }
         }
 
