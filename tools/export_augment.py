@@ -170,3 +170,96 @@ def find_stamboom_note_span(record: list[str]) -> tuple[int, int] | None:
         else:
             i += 1
     return None
+
+
+def _read_text(path: Path) -> tuple[str, str, bool]:
+    """Return (text, newline, had_trailing_newline). Decodes UTF-8 with
+    CP1252 fallback (matches build.py). Detects CRLF vs LF."""
+    raw = path.read_bytes()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        text = raw.decode("cp1252")
+    nl = "\r\n" if "\r\n" in text else "\n"
+    had_trailing = text.endswith(nl)
+    if had_trailing:
+        text = text[: -len(nl)]
+    return text, nl, had_trailing
+
+
+def _atomic_write(path: Path, data: str) -> None:
+    tmp = path.with_suffix(path.suffix + ".new")
+    tmp.write_text(data, encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(description="Merge augment.json into a GEDCOM.")
+    p.add_argument("ged", type=Path)
+    p.add_argument("--augment", type=Path, default=Path("augment.json"))
+    p.add_argument("--out", type=Path, default=None)
+    p.add_argument("--in-place", action="store_true")
+    p.add_argument("-v", "--verbose", action="store_true")
+    args = p.parse_args(argv)
+
+    if args.in_place and args.out is not None:
+        print("error: --in-place cannot be combined with --out", file=sys.stderr)
+        return 2
+
+    out_path = args.ged if args.in_place else (
+        args.out if args.out is not None
+        else args.ged.with_name(args.ged.stem + "_augmented" + args.ged.suffix)
+    )
+    if out_path == args.ged and not args.in_place:
+        print("error: --out equals input; use --in-place to overwrite",
+              file=sys.stderr)
+        return 2
+
+    try:
+        aug_data = json.loads(args.augment.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"error: cannot read {args.augment}: {e}", file=sys.stderr)
+        return 2
+    augmentations = aug_data.get("augmentations", {})
+
+    try:
+        text, nl, had_trailing = _read_text(args.ged)
+    except OSError as e:
+        print(f"error: cannot read {args.ged}: {e}", file=sys.stderr)
+        return 2
+
+    records = parse_records(text.split(nl))
+
+    counts = {"added": 0, "updated": 0, "removed": 0}
+    seen_ids: set[str] = set()
+    for idx, rec in enumerate(records):
+        rid, rtype = record_header(rec)
+        if rtype == "INDI" and rid is not None and rid in augmentations:
+            seen_ids.add(rid)
+            new_rec, action = merge_record(rec, augmentations[rid])
+            records[idx] = new_rec
+            if action in counts:
+                counts[action] += 1
+            if args.verbose:
+                print(f"{rid}: {action}", file=sys.stderr)
+
+    not_found = sorted(set(augmentations) - seen_ids)
+    for rid in not_found:
+        print(f"warning: {rid}: not found in GEDCOM", file=sys.stderr)
+
+    body = nl.join(nl.join(rec) for rec in records)
+    if had_trailing:
+        body += nl
+
+    if args.in_place:
+        backup = args.ged.with_suffix(args.ged.suffix + ".bak")
+        backup.write_bytes(args.ged.read_bytes())
+    _atomic_write(out_path, body)
+
+    print(f"added {counts['added']} · updated {counts['updated']} · "
+          f"removed {counts['removed']} · not-found {len(not_found)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

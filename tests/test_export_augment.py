@@ -202,3 +202,65 @@ def test_merge_noop_when_no_fields_and_no_block():
     new, action = ea.merge_record(record, {})
     assert action == "noop"
     assert new == record
+
+
+def _write(tmp_path, augment: dict):
+    g = tmp_path / "in.ged"
+    g.write_bytes(SAMPLE.read_bytes())
+    a = tmp_path / "augment.json"
+    a.write_text(json.dumps({"augmentations": augment}), encoding="utf-8")
+    return g, a
+
+
+def _run(tmp_path, g, a, args=()):
+    return subprocess.run(
+        [sys.executable, str(TOOL), str(g), "--augment", str(a), *args],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+
+
+def test_main_writes_default_output_with_block(tmp_path):
+    g, a = _write(tmp_path, {
+        "I7": {"email": "jan@ottenbourg.com",
+               "facebook": "https://facebook.com/janottenbourg",
+               "bio": "Regel een.\nRegel twee."}
+    })
+    r = _run(tmp_path, g, a)
+    assert r.returncode == 0, r.stderr
+    out = tmp_path / "in_augmented.ged"
+    assert out.exists()
+    text = out.read_text(encoding="utf-8")
+    assert "1 NOTE -- stamboom-augment begin --" in text
+    assert "2 CONT E-mail: jan@@ottenbourg.com" in text
+    assert "2 CONT Bio: Regel een." in text
+    assert "2 CONT Regel twee." in text
+
+
+def test_main_warns_on_id_not_in_gedcom(tmp_path):
+    g, a = _write(tmp_path, {"I999": {"email": "ghost@x.com"}})
+    r = _run(tmp_path, g, a)
+    assert r.returncode == 0
+    assert "I999" in r.stderr
+    assert "not found" in r.stderr.lower()
+
+
+def test_main_does_not_overwrite_input_by_default(tmp_path):
+    g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com"}})
+    before = g.read_bytes()
+    _run(tmp_path, g, a)
+    assert g.read_bytes() == before  # input untouched
+
+
+def test_main_in_place_writes_bak_and_rewrites_input(tmp_path):
+    g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com"}})
+    before = g.read_bytes()
+    r = _run(tmp_path, g, a, args=("--in-place",))
+    assert r.returncode == 0
+    assert (tmp_path / "in.ged.bak").read_bytes() == before
+    assert "1 NOTE -- stamboom-augment begin --" in g.read_text(encoding="utf-8")
+
+
+def test_main_rejects_in_place_with_out(tmp_path):
+    g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com"}})
+    r = _run(tmp_path, g, a, args=("--in-place", "--out", str(tmp_path / "x.ged")))
+    assert r.returncode == 2
