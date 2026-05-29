@@ -199,3 +199,20 @@ footer.build-info {
 .augment-block dl { display: grid; grid-template-columns: 120px 1fr; gap: 4px 12px; margin: 0; }
 .augment-block dt { color: var(--muted); }
 .augment-block .bio { white-space: pre-wrap; }
+
+/* ---------- treeviz: interactive family chart (family-chart 0.9.0) ---------- */
+#famtree { width: 100%; height: 70vh; min-height: 480px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); overflow: hidden; }
+#famtree svg.main_svg { background: var(--bg); }
+#famtree path.link, #famtree .link { stroke: var(--text); stroke-width: 1px; fill: none; }
+#famtree .card-inner {
+  background: var(--panel); border: 1px solid var(--text); border-radius: 6px;
+  color: var(--text); box-shadow: none;
+}
+#famtree .card-label { color: var(--text); }
+/* neutralize family-chart's gender colors → monochrome */
+#famtree .card-male .card-inner,
+#famtree .card-female .card-inner,
+#famtree .card-genderless .card-inner,
+#famtree .card-unknown .card-inner { background: var(--panel); border-color: var(--text); }
+#famtree .card-main .card-inner { box-shadow: 0 0 0 2px rgba(17, 17, 17, .3); }
+#famtree .f3-path-to-main { stroke: var(--text); }
