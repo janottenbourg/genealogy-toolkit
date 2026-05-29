@@ -16,6 +16,7 @@ Public code repo: `janottenbourg/genealogy-toolkit`.
 - PHP pages read `tree.json` into memory per request. ~500 individuals,
   ~5–15 ms.
 - Auth: copy of `/fin/` pattern. Bcrypt hash in gitignored `.password`.
+- **Tree visualization:** `boom.php` = client-side interactive chart via the `family-chart` library (d3 + family-chart@0.9.0, jsDelivr CDN, no build step), fed by `boom_data.php` (auth-gated JSON from `lib/famtree.php`). Click a card = recenter; "Open profiel →" → `persoon.php`. `voorouders.php` = server-rendered horizontal ancestor pedigree (`lib/render_pedigree.php`), printable, no JS. `lijst.php` = no-JS fallback (linked from boom.php `<noscript>`). All monochrome.
 
 ## Privacy
 - Real `jottenbourg.ged` is never committed. Lives only on workstation
@@ -64,6 +65,8 @@ ssh ubuntu@tienen.rip "sudo install -o www-data -g www-data -m 644 \
 - [ ] `lijst.php` on phone, JS disabled
 - [ ] `?id=I999` → Dutch 404
 - [ ] Footer shows correct .ged filename + build date
+- [ ] boom.php interactive tree renders + click-recenters (needs a real browser — family-chart is client-side)
+- [ ] voorouders.php pedigree renders + prints cleanly
 
 ## Open follow-ups (v2 sub-projects)
 
