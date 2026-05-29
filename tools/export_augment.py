@@ -34,3 +34,22 @@ FIELDS = [
 def escape_at(s: str) -> str:
     """GEDCOM 5.5.1: a literal '@' in a value must be doubled."""
     return s.replace("@", "@@")
+
+
+def split_value(s: str, max_bytes: int = MAX_VALUE_BYTES) -> list[str]:
+    """Split a logical line into chunks each ≤ max_bytes in UTF-8, never
+    breaking a multibyte sequence. Empty string → [''] (one empty chunk)."""
+    if s == "":
+        return [""]
+    chunks: list[str] = []
+    cur: list[str] = []
+    cur_bytes = 0
+    for ch in s:
+        b = len(ch.encode("utf-8"))
+        if cur and cur_bytes + b > max_bytes:
+            chunks.append("".join(cur))
+            cur, cur_bytes = [], 0
+        cur.append(ch)
+        cur_bytes += b
+    chunks.append("".join(cur))
+    return chunks
