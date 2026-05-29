@@ -287,3 +287,56 @@ def test_main_non_dict_augmentations_exits_2(tmp_path):
     r = _run(tmp_path, g, a)
     assert r.returncode == 2
     assert "augmentations" in r.stderr.lower()
+
+
+def test_idempotent_rerun_on_augmented_file_is_byte_identical(tmp_path):
+    g, a = _write(tmp_path, {
+        "I7": {"email": "jan@ottenbourg.com", "bio": "Lang " * 80},
+        "I3": {"facebook": "https://facebook.com/x"},
+    })
+    r1 = _run(tmp_path, g, a)
+    assert r1.returncode == 0, r1.stderr
+    out1 = (tmp_path / "in_augmented.ged").read_bytes()
+
+    # Re-run using the already-augmented file as input.
+    g2 = tmp_path / "in_augmented.ged"
+    r2 = subprocess.run(
+        [sys.executable, str(TOOL), str(g2), "--augment", str(a)],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert r2.returncode == 0, r2.stderr
+    out2 = (tmp_path / "in_augmented_augmented.ged").read_bytes()
+    assert out2 == out1  # byte-identical → no duplicate blocks, stable order
+
+
+def test_exactly_one_block_per_augmented_indi(tmp_path):
+    g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com"}})
+    _run(tmp_path, g, a)
+    text = (tmp_path / "in_augmented.ged").read_text(encoding="utf-8")
+    assert text.count("1 NOTE " + ea.BEGIN_MARKER) == 1
+
+
+def test_output_still_parses_with_build_py_unchanged_counts(tmp_path):
+    g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com",
+                                    "bio": "Regel een.\nRegel twee."}})
+    _run(tmp_path, g, a)
+    out = tmp_path / "in_augmented.ged"
+    tree_out = tmp_path / "tree.json"
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "build.py"), str(out), "--out", str(tree_out)],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert r.returncode == 0, r.stderr
+    tree = json.loads(tree_out.read_text(encoding="utf-8"))
+    assert tree["meta"]["individuals"] == 15  # same as sample.ged
+    assert tree["meta"]["families"] == 7
+
+
+def test_non_augmented_records_unchanged(tmp_path):
+    g, a = _write(tmp_path, {"I7": {"email": "jan@ottenbourg.com"}})
+    _run(tmp_path, g, a)
+    src = SAMPLE.read_text(encoding="utf-8")
+    out = (tmp_path / "in_augmented.ged").read_text(encoding="utf-8")
+    # I1's record block is untouched (appears verbatim in output).
+    i1_block = "0 @I1@ INDI\n1 NAME Désiré /Janssens/\n1 SEX M"
+    assert i1_block in src and i1_block in out

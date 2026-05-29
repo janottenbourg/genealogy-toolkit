@@ -189,7 +189,10 @@ def _read_text(path: Path) -> tuple[str, str, bool]:
 
 def _atomic_write(path: Path, data: str) -> None:
     tmp = path.with_suffix(path.suffix + ".new")
-    tmp.write_text(data, encoding="utf-8")
+    # newline="" disables Python's platform-specific line-ending translation so
+    # the detected nl (LF or CRLF) is written verbatim; prevents \r\n → \r\r\n
+    # on a second run on Windows.
+    tmp.write_text(data, encoding="utf-8", newline="")
     os.replace(tmp, path)
 
 
