@@ -162,6 +162,21 @@ curl -s -b "$COOKIES_ADMIN" "$BASE/voorouders.php?id=I3" | grep -q 'Désiré' &&
 vcode=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIES_ADMIN" "$BASE/voorouders.php?id=I999")
 [ "$vcode" = "404" ] && { echo "  PASS  voorouders unknown → 404"; ((pass++)); } || { echo "  FAIL  voorouders unknown → $vcode"; ((fail++)); }
 
+echo "==> GEDCOM export (admin)"
+# Unauthenticated POST must redirect to login, not return the file.
+code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/admin/export_gedcom.php")
+[[ "$code" == "302" ]] && { echo "  PASS  unauth export → 302"; ((pass++)); } || { echo "  FAIL  unauth export → $code"; ((fail++)); }
+# Admin POST without CSRF token → 403.
+code=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIES_ADMIN" -X POST "$BASE/admin/export_gedcom.php")
+[[ "$code" == "403" ]] && { echo "  PASS  export without CSRF → 403"; ((pass++)); } || { echo "  FAIL  export no-csrf → $code"; ((fail++)); }
+# Admin POST with CSRF → 200 + a GEDCOM that includes the augment block.
+csrf=$(curl -s -b "$COOKIES_ADMIN" "$BASE/admin.php?tab=tree" | grep -oP 'name="_csrf" value="\K[^"]+' | head -1)
+code=$(curl -s -o /tmp/exp.ged -w "%{http_code}" -b "$COOKIES_ADMIN" -d "_csrf=$csrf" "$BASE/admin/export_gedcom.php")
+[[ "$code" == "200" ]] && { echo "  PASS  admin export → 200"; ((pass++)); } || { echo "  FAIL  admin export → $code"; ((fail++)); }
+grep -q "0 HEAD" /tmp/exp.ged && { echo "  PASS  export is a GEDCOM"; ((pass++)); } || { echo "  FAIL  export not a GEDCOM"; ((fail++)); }
+grep -q -- "-- stamboom-augment begin --" /tmp/exp.ged && { echo "  PASS  export has augment block"; ((pass++)); } || { echo "  FAIL  export missing augment block"; ((fail++)); }
+rm -f /tmp/exp.ged
+
 echo "==> PHP error log scan"
 if grep -E "PHP (Fatal|Warning|Notice|Parse)" "$PHP_LOG"; then
     echo "  FAIL  PHP errors:"

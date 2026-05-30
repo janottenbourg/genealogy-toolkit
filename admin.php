@@ -164,6 +164,12 @@ function tab_link(string $slug, string $label, string $current): string {
           <?= $r ? '<a href="persoon.php?id=' . htmlspecialchars($r['id']) . '">' . htmlspecialchars($r['name']['display']) . '</a>' : '—' ?>
         </dd>
       </dl>
+      <h3 style="margin-top:24px">Augmentatie exporteren</h3>
+      <p>Download de GEDCOM met de web-augmentaties (e-mail, social, bio) samengevoed als NOTE-blok per persoon.</p>
+      <form method="post" action="admin/export_gedcom.php">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
+        <button type="submit">Download augmented GEDCOM</button>
+      </form>
       <h3 style="margin-top:24px">Stamboom verversen</h3>
       <p>Twee keer per jaar (of na grote wijzigingen) exporteer je een verse GEDCOM uit Geneanet en upload je die naar de server. Recept staat in <code>CLAUDE.md</code> sectie "GEDCOM update".</p>
     </section>
