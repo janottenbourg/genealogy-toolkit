@@ -36,6 +36,9 @@ jobs:
           python3 build.py sample.ged > /dev/null
           php tests/test_can_edit.php
 
+      - name: gedcom export unit
+        run: php tests/test_gedcom_export.php
+
       - name: famtree mapping unit
         run: |
           python3 build.py sample.ged > /dev/null

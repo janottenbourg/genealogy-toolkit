@@ -77,6 +77,12 @@ notes but drops EMAIL/WWW tags): import `jottenbourg_augmented.ged` into a
 local GeneWeb (`ged2gwb`) and re-export (`gwb2ged`); confirm the stamboom
 NOTE block survives intact. Not part of CI.
 
+Admins can also export from the web UI: **Beheer → Stamboom-data → Exporteer
+verrijkte GEDCOM**. The endpoint `admin/export_gedcom.php` runs
+`tools/export_augment.py` server-side (via `lib/gedcom_export.php`), streams the
+result as a download, and never stores it under the web root. Admin-only +
+CSRF-protected.
+
 ## Pre-deploy checklist
 - [ ] Login with wrong then right password
 - [ ] Click 3 generations up and 3 down from yourself
