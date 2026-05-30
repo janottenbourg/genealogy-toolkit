@@ -53,6 +53,7 @@ function tab_link(string $slug, string $label, string $current): string {
   <?php if ($status === 'role'):    ?><div class="toast">Rol bijgewerkt.</div><?php endif; ?>
   <?php if ($status === 'deleted'): ?><div class="toast">Account verwijderd.</div><?php endif; ?>
   <?php if ($status === 'reset'):   ?><div class="toast">Reset-link aangemaakt.</div><?php endif; ?>
+  <?php if ($status === 'export_error'): ?><div class="toast">Export mislukt — zie serverlog.</div><?php endif; ?>
   <?php if ($link): ?>
     <div class="toast">
       Stuur deze link out-of-band naar de persoon:<br>
@@ -164,11 +165,13 @@ function tab_link(string $slug, string $label, string $current): string {
           <?= $r ? '<a href="persoon.php?id=' . htmlspecialchars($r['id']) . '">' . htmlspecialchars($r['name']['display']) . '</a>' : '—' ?>
         </dd>
       </dl>
-      <h3 style="margin-top:24px">Augmentatie exporteren</h3>
-      <p>Download de GEDCOM met de web-augmentaties (e-mail, social, bio) samengevoed als NOTE-blok per persoon.</p>
+      <h3 style="margin-top:24px">Verrijkte GEDCOM exporteren</h3>
+      <p>Download een GEDCOM met de aanvullende gegevens (e-mail, telefoon,
+         sociale links, bio) samengevoegd als notitie per persoon.
+         <strong>Let op:</strong> dit bestand bevat contactgegevens — deel het niet publiek.</p>
       <form method="post" action="admin/export_gedcom.php">
         <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
-        <button type="submit">Download augmented GEDCOM</button>
+        <button type="submit">Exporteer verrijkte GEDCOM</button>
       </form>
       <h3 style="margin-top:24px">Stamboom verversen</h3>
       <p>Twee keer per jaar (of na grote wijzigingen) exporteer je een verse GEDCOM uit Geneanet en upload je die naar de server. Recept staat in <code>CLAUDE.md</code> sectie "GEDCOM update".</p>

@@ -176,6 +176,7 @@ code=$(curl -s -o /tmp/exp.ged -w "%{http_code}" -b "$COOKIES_ADMIN" -d "_csrf=$
 grep -q "0 HEAD" /tmp/exp.ged && { echo "  PASS  export is a GEDCOM"; ((pass++)); } || { echo "  FAIL  export not a GEDCOM"; ((fail++)); }
 grep -q -- "-- stamboom-augment begin --" /tmp/exp.ged && { echo "  PASS  export has augment block"; ((pass++)); } || { echo "  FAIL  export missing augment block"; ((fail++)); }
 rm -f /tmp/exp.ged
+curl -s -b "$COOKIES_ADMIN" "$BASE/admin.php?tab=tree" | grep -q 'admin/export_gedcom.php' && { echo "  PASS  export button on tree tab"; ((pass++)); } || { echo "  FAIL  no export button"; ((fail++)); }
 
 echo "==> PHP error log scan"
 if grep -E "PHP (Fatal|Warning|Notice|Parse)" "$PHP_LOG"; then
